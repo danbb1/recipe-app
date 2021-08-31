@@ -1,0 +1,6 @@
+{
+  "extends": "stylelint-config-recommended",
+  "rules": {
+    "unit-whitelist": ["em", "rem", "s", "%", "px", "ch"]
+  }
+}
