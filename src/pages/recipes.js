@@ -1,10 +1,11 @@
 import React, { useState } from "react"
-import { Container, Grid, Fab, TextField } from "@material-ui/core"
+import { Container, Grid, Fab, Modal } from "@material-ui/core"
 import { Add } from "@material-ui/icons"
 
 import Layout from "../components/layout"
 import Seo from "../components/seo"
 import RecipeCard from "../components/recipe-card"
+import AddRecipeForm from "../components/add-recipe-form"
 
 const lorem =
   "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Necessitatibus, eveniet perspiciatis? Ullam adipisci voluptatibus magnam eaque excepturi facere, ducimus consequuntur modi, accusamus corrupti repellendus tenetur vitae sequi dolorem ab dicta."
@@ -50,20 +51,17 @@ const Recipes = () => {
       >
         <Add />
       </Fab>
-      {addRecipe && (
-        <form>
-          <TextField label="Title" />
-          <TextField label="Description" multiline rows={5} />
-        </form>
-      )}
+      <Modal open={addRecipe} onClose={() => setAddRecipe(false)}>
+        <AddRecipeForm />
+      </Modal>
       <Grid
         container
         spacing={2}
         justifyContent="space-around"
-        alignItems="start"
+        alignItems="flex-start"
       >
         {recipes.map(r => (
-          <Grid item xs={12} md={6} lg={4}>
+          <Grid item xs={12} sm={6} lg={4}>
             <Container>
               <RecipeCard recipe={r} />
             </Container>

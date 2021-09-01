@@ -19,7 +19,9 @@ import { Favorite, Share, ExpandMore, MoreVert } from "@material-ui/icons"
 
 const useStyles = makeStyles(theme => ({
   root: {
-    maxWidth: 345,
+    [theme.breakpoints.up("sm")]: {
+      maxWidth: 345,
+    },
   },
   media: {
     height: 0,
@@ -90,7 +92,9 @@ const RecipeCard = ({ recipe }) => {
       </CardActions>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
-          <Typography variant="h6" paragraph>Ingredients:</Typography>
+          <Typography variant="h6" paragraph>
+            Ingredients:
+          </Typography>
           <List disablePadding>
             {recipe.ingredients.map(i => (
               <ListItem key={`${recipe.title}-${i.item}`}>
@@ -99,7 +103,9 @@ const RecipeCard = ({ recipe }) => {
               </ListItem>
             ))}
           </List>
-          <Typography variant="h6" paragraph>Method:</Typography>
+          <Typography variant="h6" paragraph>
+            Method:
+          </Typography>
           {recipe.method.map(m => (
             <Typography paragraph>{m}</Typography>
           ))}
