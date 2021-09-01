@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { Container, Grid, Fab, Modal } from "@material-ui/core"
 import { Add } from "@material-ui/icons"
+import { nanoid } from "nanoid"
 
 import Layout from "../components/layout"
 import Seo from "../components/seo"
@@ -61,7 +62,7 @@ const Recipes = () => {
         alignItems="flex-start"
       >
         {recipes.map(r => (
-          <Grid item xs={12} sm={6} lg={4}>
+          <Grid key={nanoid()} item xs={12} sm={6} lg={4}>
             <Container>
               <RecipeCard recipe={r} />
             </Container>

@@ -1,14 +1,27 @@
 import React, { useState } from "react"
 import { Formik, Form, Field, FieldArray, useField } from "formik"
-import { makeStyles, TextField, Paper, MenuItem } from "@material-ui/core"
+import {
+  makeStyles,
+  TextField,
+  Button,
+  Grid,
+  Paper,
+  MenuItem,
+  IconButton,
+  Typography,
+} from "@material-ui/core"
+import { AddCircle, Delete } from "@material-ui/icons"
+import { nanoid } from "nanoid"
 import axios from "axios"
 import * as Yup from "yup"
 import PropTypes from "prop-types"
 
 const useStyles = makeStyles(theme => ({
   paper: {
-    padding: "2rem",
+    padding: "1.5rem",
     position: "absolute",
+    maxHeight: "95%",
+    overflowY: "scroll",
     top: "50%",
     left: "50%",
     transform: "translateX(-50%) translateY(-50%)",
@@ -25,20 +38,23 @@ const CustomSelect = props => {
   // eslint-disable-next-line react/destructuring-assignment
   const [field, , helpers] = useField(props.field)
 
-  console.log(options.find(option => option.value === field.value))
-
   return (
     <TextField
+      fullWidth
       label={label}
       name={name}
       id={id}
       select
-      value={options && options.find(option => option.value === field.value).value}
+      value={
+        options && options.find(option => option.value === field.value).value
+      }
       onChange={option => helpers.setValue(option.target.value)}
       onBlur={field.onBlur}
     >
       {options.map(option => (
-        <MenuItem value={option.value}>{option.label}</MenuItem>
+        <MenuItem key={nanoid()} value={option.value}>
+          {option.label}
+        </MenuItem>
       ))}
     </TextField>
   )
@@ -46,13 +62,13 @@ const CustomSelect = props => {
 
 const AddRecipeForm = React.forwardRef((props, ref) => {
   const classes = useStyles()
-  const [ingredientRows, setIngredientRows] = useState(1)
 
   const today = new Date()
-  console.log(today.getDate())
 
   const initialValues = {
     title: "",
+    id: nanoid(),
+    image: "",
     description: "",
     date: `${today.getFullYear()}-${
       today.getMonth() + 1 < 10
@@ -66,11 +82,12 @@ const AddRecipeForm = React.forwardRef((props, ref) => {
         unit: "g",
       },
     ],
-    method: [],
+    method: [""],
   }
 
   const schema = {
     title: Yup.string().required("Required"),
+    image: Yup.string(),
     description: Yup.string().required("Required"),
     date: Yup.string().required("Required"),
     ingredients: Yup.array().of(
@@ -118,125 +135,182 @@ const AddRecipeForm = React.forwardRef((props, ref) => {
       >
         {({ handleChange, handleBlur, errors, touched, values }) => (
           <Form>
-            <Field
-              id="title"
-              name="title"
-              label="Title"
-              component={TextField}
-              autoFocus
-              onBlur={handleBlur}
-              onChange={handleChange}
-              error={touched.title && Boolean(errors.title)}
-              helperText={touched.title && errors.title}
-            />
-            <Field
-              id="date"
-              name="date"
-              label="Date"
-              component={TextField}
-              type="date"
-              defaultValue={values.date}
-              onBlur={handleBlur}
-              onChange={handleChange}
-              error={touched.date && Boolean(errors.date)}
-              helperText={touched.date && errors.date}
-            />
-            <Field
-              id="description"
-              name="description"
-              label="Description"
-              component={TextField}
-              fullWidth
-              multiline
-              rows={5}
-              onBlur={handleBlur}
-              onChange={handleChange}
-              error={touched.description && Boolean(errors.description)}
-              helperText={touched.description && errors.description}
-            />
-            <FieldArray
-              name="ingredients"
-              render={arrayHelpers => (
-                <>
-                  {values.ingredients.map((ingredient, i) => (
-                    <>
-                      <Field
-                        id={`ingredients[${i}].item`}
-                        name={`ingredients[${i}].item`}
-                        label="Item"
-                        component={TextField}
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                      />
-                      <Field
-                        id={`ingredients[${i}].amount`}
-                        name={`ingredients[${i}].amount`}
-                        label="Amount"
-                        component={TextField}
-                        type="number"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                      />
-                      <Field
-                        id={`ingredients[${i}].unit`}
-                        name={`ingredients[${i}].unit`}
-                        label="Unit"
-                        component={CustomSelect}
-                        value={values.ingredients[i].unit}
-                        options={units}
-                      />
-                    </>
-                  ))}
-                </>
-              )}
-            />
-            {/* <TextField
-            id="date"
-            name="date"
-            label="Date"
-            value={formik.values.date}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={formik.touched.date && Boolean(formik.errors.date)}
-            helperText={formik.touched.date && formik.errors.date}
-          />
-          <TextField
-            fullWidth
-            multiline
-            rows={5}
-            id="description"
-            name="description"
-            label="Description"
-            value={formik.values.description}
-            onBlur={formik.handleBlur}
-            onChange={formik.handleChange}
-            error={
-              formik.touched.description && Boolean(formik.errors.description)
-            }
-            helperText={formik.touched.description && formik.errors.description}
-          /> */}
-            {/* {[...Array(ingredientRows)].map((x, i) => (
-            <div>
-              <TextField
-                id={`ingredient-${i}-item`}
-                name={`ingredient-${i}-item`}
-                label="Item"
-                value={formik.values.ingredients[i].item}
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                error={
-                  formik.touched.ingredients[i].item &&
-                  Boolean(formik.errors.ingredients[i].item)
-                }
-                helperText={
-                  formik.touched.ingredients[i].item &&
-                  formik.errors.ingredients[i].item
-                }
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={8}>
+                <Field
+                  fullWidth
+                  id="title"
+                  name="title"
+                  label="Title"
+                  component={TextField}
+                  autoFocus
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  error={touched.title && Boolean(errors.title)}
+                  helperText={touched.title && errors.title}
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <Field
+                  fullWidth
+                  id="date"
+                  name="date"
+                  label="Date"
+                  component={TextField}
+                  type="date"
+                  defaultValue={values.date}
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  error={touched.date && Boolean(errors.date)}
+                  helperText={touched.date && errors.date}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Field
+                  fullWidth
+                  id="image"
+                  name="image"
+                  label="Image Link"
+                  component={TextField}
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  error={touched.image && Boolean(errors.image)}
+                  helperText={touched.image && errors.image}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Field
+                  id="description"
+                  name="description"
+                  label="Description"
+                  component={TextField}
+                  fullWidth
+                  multiline
+                  rows={5}
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  error={touched.description && Boolean(errors.description)}
+                  helperText={touched.description && errors.description}
+                />
+              </Grid>
+              <FieldArray
+                name="ingredients"
+                render={arrayHelpers => (
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle1">Ingredients</Typography>
+                    {values.ingredients.map((ingredient, i) => (
+                      <Grid
+                        container
+                        spacing={2}
+                        // eslint-disable-next-line react/no-array-index-key
+                        key={`${values.id}-ingredient-${i}`}
+                      >
+                        <Grid item xs={5} sm={6}>
+                          <Field
+                            fullWidth
+                            id={`ingredients[${i}].item`}
+                            name={`ingredients[${i}].item`}
+                            label="Item"
+                            component={TextField}
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <Field
+                            fullWidth
+                            id={`ingredients[${i}].amount`}
+                            name={`ingredients[${i}].amount`}
+                            label="Amount"
+                            component={TextField}
+                            type="number"
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                          />
+                        </Grid>
+                        <Grid item xs={2}>
+                          <Field
+                            id={`ingredients[${i}].unit`}
+                            name={`ingredients[${i}].unit`}
+                            label="Unit"
+                            component={CustomSelect}
+                            value={values.ingredients[i].unit}
+                            options={units}
+                          />
+                        </Grid>
+                        {values.ingredients.length > 1 && (
+                          <Grid item xs={1}>
+                            <IconButton onClick={() => arrayHelpers.remove(i)}>
+                              <Delete />
+                            </IconButton>
+                          </Grid>
+                        )}
+                      </Grid>
+                    ))}
+                    <Grid item>
+                      <IconButton
+                        onClick={() =>
+                          arrayHelpers.push({
+                            item: "",
+                            amount: 0,
+                            unit: "g",
+                          })
+                        }
+                      >
+                        <AddCircle />
+                      </IconButton>
+                    </Grid>
+                  </Grid>
+                )}
               />
-            </div>
-          ))} */}
-            Errors: {JSON.stringify(errors, null, 2)}
-            Values: {JSON.stringify(values, null, 2)}
+              <FieldArray
+                name="method"
+                render={arrayHelpers => (
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle1">Method</Typography>
+                    {values.method.map((method, i) => (
+                      <Grid
+                        container
+                        spacing={2}
+                        // eslint-disable-next-line react/no-array-index-key
+                        key={`${values.id}-method-${i}`}
+                      >
+                        <Grid item xs={10}>
+                          <Field
+                            fullWidth
+                            id={`method[${i}]`}
+                            name={`method[${i}]`}
+                            label={`Step ${i + 1}`}
+                            component={TextField}
+                            multiline
+                            rows={3}
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                          />
+                        </Grid>
+                        {values.method.length > 1 && (
+                          <Grid item xs={1}>
+                            <IconButton onClick={() => arrayHelpers.remove(i)}>
+                              <Delete />
+                            </IconButton>
+                          </Grid>
+                        )}
+                      </Grid>
+                    ))}
+                    <Grid item>
+                      <IconButton onClick={() => arrayHelpers.push("")}>
+                        <AddCircle />
+                      </IconButton>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Button fullWidth variant="contained" type="submit">Submit</Button>
+                    </Grid>
+                  </Grid>
+                )}
+              />
+              {/* Errors: {JSON.stringify(errors, null, 2)}
+              Values: {JSON.stringify(values, null, 2)} */}
+            </Grid>
           </Form>
         )}
       </Formik>

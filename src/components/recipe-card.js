@@ -16,6 +16,7 @@ import {
 } from "@material-ui/core"
 import { red } from "@material-ui/core/colors"
 import { Favorite, Share, ExpandMore, MoreVert } from "@material-ui/icons"
+import { nanoid } from "nanoid"
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -97,7 +98,7 @@ const RecipeCard = ({ recipe }) => {
           </Typography>
           <List disablePadding>
             {recipe.ingredients.map(i => (
-              <ListItem key={`${recipe.title}-${i.item}`}>
+              <ListItem key={nanoid()}>
                 <ListItemText primary={i.item} />
                 <ListItemText primary={`${i.amount} ${i.unit}`} />
               </ListItem>
@@ -107,7 +108,9 @@ const RecipeCard = ({ recipe }) => {
             Method:
           </Typography>
           {recipe.method.map(m => (
-            <Typography paragraph>{m}</Typography>
+            <Typography key={nanoid()} paragraph>
+              {m}
+            </Typography>
           ))}
         </CardContent>
       </Collapse>
