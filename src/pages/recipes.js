@@ -41,6 +41,11 @@ const recipes = [
 const Recipes = () => {
   const [addRecipe, setAddRecipe] = useState(false)
 
+  const handleSubmit = (newRecipe) => {
+    recipes.push(newRecipe)
+    setAddRecipe(false)
+  }
+
   return (
     <Layout>
       <Seo title="Recipes" />
@@ -53,7 +58,7 @@ const Recipes = () => {
         <Add />
       </Fab>
       <Modal open={addRecipe} onClose={() => setAddRecipe(false)}>
-        <AddRecipeForm />
+        <AddRecipeForm handleSubmit={handleSubmit} />
       </Modal>
       <Grid
         container

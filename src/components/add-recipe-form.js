@@ -61,8 +61,8 @@ const CustomSelect = props => {
 }
 
 const AddRecipeForm = React.forwardRef((props, ref) => {
+  const { handleSubmit } = props
   const classes = useStyles()
-
   const today = new Date()
 
   const initialValues = {
@@ -129,7 +129,7 @@ const AddRecipeForm = React.forwardRef((props, ref) => {
         initialValues={initialValues}
         validationSchema={Yup.object(schema)}
         onSubmit={(values, { setSubmitting }) => {
-          console.log(values)
+          handleSubmit(values)
           setSubmitting(false)
         }}
       >
