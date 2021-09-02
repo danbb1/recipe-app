@@ -6,7 +6,7 @@ import { nanoid } from "nanoid"
 import Layout from "../components/layout"
 import Seo from "../components/seo"
 import RecipeCard from "../components/recipe-card"
-import AddRecipeForm from "../components/add-recipe-form"
+import RecipeForm from "../components/recipe-form"
 
 const lorem =
   "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Necessitatibus, eveniet perspiciatis? Ullam adipisci voluptatibus magnam eaque excepturi facere, ducimus consequuntur modi, accusamus corrupti repellendus tenetur vitae sequi dolorem ab dicta."
@@ -58,7 +58,7 @@ const Recipes = () => {
         <Add />
       </Fab>
       <Modal open={addRecipe} onClose={() => setAddRecipe(false)}>
-        <AddRecipeForm handleSubmit={handleSubmit} />
+        <RecipeForm handleSubmit={handleSubmit} />
       </Modal>
       <Grid
         container

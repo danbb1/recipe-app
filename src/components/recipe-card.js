@@ -9,14 +9,24 @@ import {
   Collapse,
   Avatar,
   IconButton,
+  Menu,
+  MenuItem,
+  Modal,
   Typography,
   List,
   ListItem,
   ListItemText,
 } from "@material-ui/core"
 import { red } from "@material-ui/core/colors"
-import { Favorite, Share, ExpandMore, MoreVert } from "@material-ui/icons"
-import { nanoid } from "nanoid"
+import {
+  Favorite,
+  Share,
+  ExpandMore,
+  MoreVert,
+  Image,
+} from "@material-ui/icons"
+
+import RecipeForm from "./recipe-form"
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -41,13 +51,45 @@ const useStyles = makeStyles(theme => ({
   avatar: {
     backgroundColor: red[500],
   },
+  ingredientList: {
+    textAlign: "right",
+  },
+  missingImage: {
+    marginLeft: theme.spacing(2),
+  },
 }))
+
+const ViewMoreMenu = ({ anchorEl, handleViewMoreMenuClose, recipe }) => {
+  const [editRecipe, setEditRecipe] = useState(false)
+  return (
+    <Menu
+      id="view-more-menu"
+      anchorEl={anchorEl}
+      keepMounted
+      open={Boolean(anchorEl)}
+      onClose={handleViewMoreMenuClose}
+    >
+      <MenuItem onClick={() => setEditRecipe(true)}>Edit</MenuItem>
+      <Modal open={editRecipe} onClose={() => setEditRecipe(false)}>
+        <RecipeForm recipe={recipe} />
+      </Modal>
+      <MenuItem>Delete</MenuItem>
+    </Menu>
+  )
+}
 
 const RecipeCard = ({ recipe }) => {
   const classes = useStyles()
   const [expanded, setExpanded] = useState()
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null)
 
   const handleExpandClick = () => setExpanded(!expanded)
+
+  const handleViewMoreMenuOpen = event => {
+    setMenuAnchorEl(event.currentTarget)
+  }
+
+  const handleViewMoreMenuClose = () => setMenuAnchorEl(null)
 
   return (
     <Card className={classes.root}>
@@ -58,18 +100,27 @@ const RecipeCard = ({ recipe }) => {
           </Avatar>
         }
         action={
-          <IconButton aria-label="settings">
+          <IconButton aria-label="settings" onClick={handleViewMoreMenuOpen}>
             <MoreVert />
           </IconButton>
         }
         title={recipe.title}
         subheader={new Date().toLocaleDateString()}
       />
-      <CardMedia
-        className={classes.media}
-        image="https://images.unsplash.com/photo-1516684732162-798a0062be99?ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cmljZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-        title="rice"
+      <ViewMoreMenu
+        anchorEl={menuAnchorEl}
+        handleViewMoreMenuClose={handleViewMoreMenuClose}
+        recipe={recipe}
       />
+      {recipe.image ? (
+        <CardMedia
+          className={classes.media}
+          image={recipe.image}
+          title={`${recipe.title} image`}
+        />
+      ) : (
+        <Image className={classes.missingImage} />
+      )}
       <CardContent>
         <Typography variant="body2" color="textSecondary" component="p">
           {recipe.description}
@@ -98,9 +149,12 @@ const RecipeCard = ({ recipe }) => {
           </Typography>
           <List disablePadding>
             {recipe.ingredients.map(i => (
-              <ListItem key={nanoid()}>
+              <ListItem key={`card-${i.key}`} justifyContent="space-between">
                 <ListItemText primary={i.item} />
-                <ListItemText primary={`${i.amount} ${i.unit}`} />
+                <ListItemText
+                  className={classes.ingredientList}
+                  primary={`${i.amount} ${i.unit !== "number" ? i.unit : ""}`}
+                />
               </ListItem>
             ))}
           </List>
@@ -108,8 +162,8 @@ const RecipeCard = ({ recipe }) => {
             Method:
           </Typography>
           {recipe.method.map(m => (
-            <Typography key={nanoid()} paragraph>
-              {m}
+            <Typography key={`card${m.key}`} paragraph>
+              {m.text}
             </Typography>
           ))}
         </CardContent>
