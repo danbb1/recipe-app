@@ -5,11 +5,14 @@
   "version": "0.1.0",
   "author": "Dan bridges <danielbridges@protonmail.com>",
   "dependencies": {
+    "@apollo/client": "^3.4.10",
     "@fontsource/roboto": "^4.5.0",
     "@material-ui/core": "^4.12.3",
     "@material-ui/icons": "^4.11.2",
+    "dotenv": "^8.6.0",
     "formik": "^2.2.9",
     "gatsby": "^3.12.1",
+    "gatsby-plugin-apollo": "^3.0.2",
     "gatsby-plugin-gatsby-cloud": "^2.11.0",
     "gatsby-plugin-image": "^1.12.0",
     "gatsby-plugin-manifest": "^3.12.0",
@@ -54,9 +57,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/gatsbyjs/gatsby-starter-default"
+    "url": "git+https://github.com/gatsbyjs/gatsby-starter-default.git"
   },
   "bugs": {
     "url": "https://github.com/gatsbyjs/gatsby/issues"
-  }
+  },
+  "homepage": "https://github.com/gatsbyjs/gatsby-starter-default#readme",
+  "main": ".eslintrc.js"
 }

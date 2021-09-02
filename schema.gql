@@ -1,0 +1,24 @@
+type Ingredient @embedded {
+  key: String!
+  item: String!
+  amount: Float!
+  unit: String!
+}
+
+type Step @embedded {
+  key: String!
+  text: String!
+}
+
+type Recipe {
+  title: String!
+  id: String!
+  image: String
+  description: String
+  date: String!
+  ingredients: [Ingredient!]! 
+  method: [Step!]!
+}
+type Query {
+  allRecipes: [Recipe]
+}

@@ -1,3 +1,7 @@
+require("dotenv").config({
+  path: `.env`,
+})
+
 module.exports = {
   siteMetadata: {
     title: `Recipe App`,
@@ -14,6 +18,15 @@ module.exports = {
       options: {
         name: `images`,
         path: `${__dirname}/src/images`,
+      },
+    },
+    {
+      resolve: `gatsby-plugin-apollo`,
+      options: {
+        uri: "https://graphql.fauna.com/graphql",
+        headers: {
+          Authorization: `Bearer ${process.env.FAUNA_READ_KEY}`,
+        },
       },
     },
     `gatsby-transformer-sharp`,

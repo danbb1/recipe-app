@@ -12,7 +12,6 @@ import {
 } from "@material-ui/core"
 import { AddCircle, Delete } from "@material-ui/icons"
 import { nanoid } from "nanoid"
-import axios from "axios"
 import * as Yup from "yup"
 import PropTypes from "prop-types"
 
@@ -62,7 +61,6 @@ const CustomSelect = props => {
 
 const RecipeForm = React.forwardRef((props, ref) => {
   const { handleSubmit, recipe } = props
-  console.log(recipe)
   const classes = useStyles()
   const today = new Date()
 

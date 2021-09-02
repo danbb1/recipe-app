@@ -149,7 +149,7 @@ const RecipeCard = ({ recipe }) => {
           </Typography>
           <List disablePadding>
             {recipe.ingredients.map(i => (
-              <ListItem key={`card-${i.key}`} justifyContent="space-between">
+              <ListItem key={`card-${i.key}`}>
                 <ListItemText primary={i.item} />
                 <ListItemText
                   className={classes.ingredientList}
