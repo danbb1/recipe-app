@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { gql, useMutation } from "@apollo/client"
 import {
   makeStyles,
   Card,
@@ -25,8 +26,19 @@ import {
   MoreVert,
   Image,
 } from "@material-ui/icons"
+import { nanoid } from "nanoid"
 
 import RecipeForm from "./recipe-form"
+
+import { GET_RECIPES, UPDATE_RECIPE, DELETE_RECIPE } from "../apollo/queries"
+
+const ADD_RECIPE = gql`
+  mutation ($data: RecipeInput!) {
+    createRecipe(data: $data) {
+      title
+    }
+  }
+`
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -59,8 +71,11 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-const ViewMoreMenu = ({ anchorEl, handleViewMoreMenuClose, recipe }) => {
-  const [editRecipe, setEditRecipe] = useState(false)
+const ViewMoreMenu = ({ anchorEl, handleViewMoreMenuClose, recipe, setEditRecipe }) => {
+  const [deleteRecipe] = useMutation(DELETE_RECIPE, {
+    refetchQueries: [GET_RECIPES],
+  })
+
   return (
     <Menu
       id="view-more-menu"
@@ -70,10 +85,9 @@ const ViewMoreMenu = ({ anchorEl, handleViewMoreMenuClose, recipe }) => {
       onClose={handleViewMoreMenuClose}
     >
       <MenuItem onClick={() => setEditRecipe(true)}>Edit</MenuItem>
-      <Modal open={editRecipe} onClose={() => setEditRecipe(false)}>
-        <RecipeForm recipe={recipe} />
-      </Modal>
-      <MenuItem>Delete</MenuItem>
+      <MenuItem onClick={() => deleteRecipe({ variables: { id: recipe._id } })}>
+        Delete
+      </MenuItem>
     </Menu>
   )
 }
@@ -82,6 +96,26 @@ const RecipeCard = ({ recipe }) => {
   const classes = useStyles()
   const [expanded, setExpanded] = useState()
   const [menuAnchorEl, setMenuAnchorEl] = useState(null)
+  const [editRecipe, setEditRecipe] = useState(false)
+
+  const recipeGraphQlShape = recipe
+    ? {
+        title: recipe.title || "",
+        image: recipe.image || "",
+        description: recipe.description || "",
+        date: recipe.date || formattedToday,
+        ingredients: recipe.ingredients.map(i => ({
+          item: i.item || "",
+          amount: i.amount || 0,
+          unit: i.unit || "g",
+          key: i.key || nanoid(),
+        })),
+        method: recipe.method.map(m => ({
+          text: m.text || "",
+          key: m.key || nanoid(),
+        })),
+      }
+    : null
 
   const handleExpandClick = () => setExpanded(!expanded)
 
@@ -91,11 +125,32 @@ const RecipeCard = ({ recipe }) => {
 
   const handleViewMoreMenuClose = () => setMenuAnchorEl(null)
 
+  const [updateRecipe, { data, loading, error }] = useMutation(UPDATE_RECIPE, {
+    refetchQueries: [GET_RECIPES],
+  })
+
+  const handleSubmit = async newRecipe => {
+    try {
+      await updateRecipe({ variables: { id: recipe._id, data: newRecipe } })
+      setEditRecipe(false)
+    } catch (er) {
+      console.log(er.message)
+    }
+  }
+
+  const handleFavorite = () => {
+    const newRecipe = {
+      ...recipeGraphQlShape,
+      favorite: !recipe.favorite
+    }
+    updateRecipe({ variables: { id: recipe._id, data: newRecipe } })
+  }
+
   return (
     <Card className={classes.root}>
       <CardHeader
         avatar={
-          <Avatar aria-label="recipe" className={classes.avatar}>
+          <Avatar aria-label="user" className={classes.avatar}>
             R
           </Avatar>
         }
@@ -111,7 +166,11 @@ const RecipeCard = ({ recipe }) => {
         anchorEl={menuAnchorEl}
         handleViewMoreMenuClose={handleViewMoreMenuClose}
         recipe={recipe}
+        setEditRecipe={setEditRecipe}
       />
+      <Modal open={editRecipe} onClose={() => setEditRecipe(false)}>
+        <RecipeForm recipe={recipeGraphQlShape} handleSubmit={handleSubmit} />
+      </Modal>
       {recipe.image ? (
         <CardMedia
           className={classes.media}
@@ -127,8 +186,8 @@ const RecipeCard = ({ recipe }) => {
         </Typography>
       </CardContent>
       <CardActions disableSpacing>
-        <IconButton aria-label="add to favorites">
-          <Favorite />
+        <IconButton aria-label="add to favorites" onClick={handleFavorite}>
+          <Favorite color={recipe.favorite ? "error" : ""} />
         </IconButton>
         <IconButton aria-label="share">
           <Share />

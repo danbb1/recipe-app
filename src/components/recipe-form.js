@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect } from "react"
 import { Formik, Form, Field, FieldArray, useField } from "formik"
 import {
   makeStyles,
@@ -13,7 +13,6 @@ import {
 import { AddCircle, Delete } from "@material-ui/icons"
 import { nanoid } from "nanoid"
 import * as Yup from "yup"
-import PropTypes from "prop-types"
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -59,21 +58,156 @@ const CustomSelect = props => {
   )
 }
 
+const IngredientsFieldArray = ({ values, handleBlur, handleChange, units }) => (
+  <FieldArray
+    name="ingredients"
+    render={arrayHelpers => {
+      const handleRemove = i => {
+        arrayHelpers.remove(i)
+      }
+
+      const handleAdd = () => {
+        arrayHelpers.push({
+          key: nanoid(),
+          item: "",
+          amount: 0,
+          unit: "g",
+        })
+      }
+      return (
+        <Grid item xs={12}>
+          <Typography variant="subtitle1">Ingredients</Typography>
+          {values.ingredients.map((ingredient, i) => (
+            <Grid container spacing={2} key={`${ingredient.key}`}>
+              <Grid item xs={5} sm={6}>
+                <Field
+                  fullWidth
+                  id={`ingredients[${i}].item`}
+                  value={values.ingredients[i].item}
+                  name={`ingredients[${i}].item`}
+                  label="Item"
+                  component={TextField}
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <Field
+                  fullWidth
+                  id={`ingredients[${i}].amount`}
+                  name={`ingredients[${i}].amount`}
+                  value={values.ingredients[i].amount}
+                  label="Amount"
+                  component={TextField}
+                  type="number"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid item xs={2}>
+                <Field
+                  id={`ingredients[${i}].unit`}
+                  name={`ingredients[${i}].unit`}
+                  label="Unit"
+                  component={CustomSelect}
+                  value={values.ingredients[i].unit}
+                  options={units}
+                />
+              </Grid>
+              {values.ingredients.length > 1 && (
+                <Grid item xs={1}>
+                  <IconButton onClick={() => handleRemove(i)}>
+                    <Delete />
+                  </IconButton>
+                </Grid>
+              )}
+            </Grid>
+          ))}
+          <Grid item>
+            <IconButton onClick={handleAdd}>
+              <AddCircle />
+            </IconButton>
+          </Grid>
+        </Grid>
+      )
+    }}
+  />
+)
+
+const MethodFieldArray = ({ values, handleBlur, handleChange }) => (
+  <FieldArray
+    name="method"
+    render={arrayHelpers => {
+      const handleRemove = i => {
+        arrayHelpers.remove(i)
+      }
+
+      const handleAdd = () => {
+        arrayHelpers.push({
+          key: nanoid(),
+          text: "",
+        })
+      }
+
+      return (
+        <Grid item xs={12}>
+          <Typography variant="subtitle1">Method</Typography>
+          {values.method.map((method, i) => (
+            <Grid container spacing={2} key={`${method.key}`}>
+              <Grid item xs={10}>
+                <Field
+                  fullWidth
+                  id={`method[${i}].text`}
+                  name={`method[${i}].text`}
+                  value={values.method[i].text}
+                  label={`Step ${i + 1}`}
+                  component={TextField}
+                  multiline
+                  rows={3}
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                />
+              </Grid>
+              {values.method.length > 1 && (
+                <Grid item xs={1}>
+                  <IconButton onClick={() => handleRemove(i)}>
+                    <Delete />
+                  </IconButton>
+                </Grid>
+              )}
+            </Grid>
+          ))}
+          <Grid item>
+            <IconButton onClick={handleAdd}>
+              <AddCircle />
+            </IconButton>
+          </Grid>
+          <Grid item xs={12}>
+            <Button fullWidth variant="contained" type="submit">
+              Submit
+            </Button>
+          </Grid>
+        </Grid>
+      )
+    }}
+  />
+)
+
 const RecipeForm = React.forwardRef((props, ref) => {
   const { handleSubmit, recipe } = props
   const classes = useStyles()
   const today = new Date()
+  const formattedToday = `${today.getFullYear()}-${
+    today.getMonth() + 1 < 10
+      ? `0${today.getMonth() + 1}`
+      : today.getMonth() + 1
+  }-${today.getDate() < 10 ? `0${today.getDate()}` : today.getDate()}`
 
   const initialValues = {
     title: "",
-    id: nanoid(),
     image: "",
     description: "",
-    date: `${today.getFullYear()}-${
-      today.getMonth() + 1 < 10
-        ? `0${today.getMonth() + 1}`
-        : today.getMonth() + 1
-    }-${today.getDate() < 10 ? `0${today.getDate()}` : today.getDate()}`,
+    date: formattedToday,
     ingredients: [
       {
         key: nanoid(),
@@ -97,9 +231,9 @@ const RecipeForm = React.forwardRef((props, ref) => {
     date: Yup.string().required("Required"),
     ingredients: Yup.array().of(
       Yup.object().shape({
-        item: Yup.string().required("Required"),
-        amount: Yup.number().required("Required"),
-        unit: Yup.string().required(),
+        item: Yup.string(),
+        amount: Yup.number(),
+        unit: Yup.string(),
       })
     ),
     method: Yup.array().of(
@@ -206,146 +340,20 @@ const RecipeForm = React.forwardRef((props, ref) => {
                   helperText={touched.description && errors.description}
                 />
               </Grid>
-              <FieldArray
-                name="ingredients"
-                render={arrayHelpers => {
-                  const handleRemove = i => {
-                    arrayHelpers.remove(i)
-                  }
-
-                  const handleAdd = () => {
-                    arrayHelpers.push({
-                      key: nanoid(),
-                      item: "",
-                      amount: 0,
-                      unit: "g",
-                    })
-                  }
-                  return (
-                    <Grid item xs={12}>
-                      <Typography variant="subtitle1">Ingredients</Typography>
-                      {values.ingredients.map((ingredient, i) => (
-                        <Grid
-                          container
-                          spacing={2}
-                          key={`${values.id}-ingredient-${ingredient.key}`}
-                        >
-                          <Grid item xs={5} sm={6}>
-                            <Field
-                              fullWidth
-                              id={`ingredients[${i}].item`}
-                              value={values.ingredients[i].item}
-                              name={`ingredients[${i}].item`}
-                              label="Item"
-                              component={TextField}
-                              onBlur={handleBlur}
-                              onChange={handleChange}
-                            />
-                          </Grid>
-                          <Grid item xs={3}>
-                            <Field
-                              fullWidth
-                              id={`ingredients[${i}].amount`}
-                              name={`ingredients[${i}].amount`}
-                              value={values.ingredients[i].amount}
-                              label="Amount"
-                              component={TextField}
-                              type="number"
-                              onBlur={handleBlur}
-                              onChange={handleChange}
-                            />
-                          </Grid>
-                          <Grid item xs={2}>
-                            <Field
-                              id={`ingredients[${i}].unit`}
-                              name={`ingredients[${i}].unit`}
-                              label="Unit"
-                              component={CustomSelect}
-                              value={values.ingredients[i].unit}
-                              options={units}
-                            />
-                          </Grid>
-                          {values.ingredients.length > 1 && (
-                            <Grid item xs={1}>
-                              <IconButton onClick={() => handleRemove(i)}>
-                                <Delete />
-                              </IconButton>
-                            </Grid>
-                          )}
-                        </Grid>
-                      ))}
-                      <Grid item>
-                        <IconButton onClick={handleAdd}>
-                          <AddCircle />
-                        </IconButton>
-                      </Grid>
-                    </Grid>
-                  )
-                }}
+              <IngredientsFieldArray
+                values={values}
+                handleBlur={handleBlur}
+                handleChange={handleChange}
+                units={units}
               />
-              <FieldArray
-                name="method"
-                render={arrayHelpers => {
-                  const handleRemove = i => {
-                    arrayHelpers.remove(i)
-                  }
-
-                  const handleAdd = () => {
-                    arrayHelpers.push({
-                      key: nanoid(),
-                      text: "",
-                    })
-                  }
-
-                  return (
-                    <Grid item xs={12}>
-                      <Typography variant="subtitle1">Method</Typography>
-                      {values.method.map((method, i) => (
-                        <Grid
-                          container
-                          spacing={2}
-                          key={`${values.id}-${method.key}`}
-                        >
-                          <Grid item xs={10}>
-                            <Field
-                              fullWidth
-                              id={`method[${i}].text`}
-                              name={`method[${i}].text`}
-                              value={values.method[i].text}
-                              label={`Step ${i + 1}`}
-                              component={TextField}
-                              multiline
-                              rows={3}
-                              onBlur={handleBlur}
-                              onChange={handleChange}
-                            />
-                          </Grid>
-                          {values.method.length > 1 && (
-                            <Grid item xs={1}>
-                              <IconButton onClick={() => handleRemove(i)}>
-                                <Delete />
-                              </IconButton>
-                            </Grid>
-                          )}
-                        </Grid>
-                      ))}
-                      <Grid item>
-                        <IconButton onClick={handleAdd}>
-                          <AddCircle />
-                        </IconButton>
-                      </Grid>
-                      <Grid item xs={12}>
-                        <Button fullWidth variant="contained" type="submit">
-                          Submit
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  )
-                }}
+              <MethodFieldArray
+                values={values}
+                handleBlur={handleBlur}
+                handleChange={handleChange}
               />
-              <div>Errors: {JSON.stringify(errors, null, 2)}</div>
-              <div>Values: {JSON.stringify(values, null, 2)}</div>
             </Grid>
+            <div>Errors: {JSON.stringify(errors, null, 2)}</div>
+            <div>Values: {JSON.stringify(values, null, 2)}</div>
           </Form>
         )}
       </Formik>

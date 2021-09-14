@@ -10,15 +10,20 @@ type Step @embedded {
   text: String!
 }
 
+type User {
+  favorites: [Recipe] @relation
+}
+
 type Recipe {
   title: String!
-  id: String!
   image: String
   description: String
   date: String!
   ingredients: [Ingredient!]! 
   method: [Step!]!
+  user: User!
 }
+
 type Query {
   allRecipes: [Recipe]
 }

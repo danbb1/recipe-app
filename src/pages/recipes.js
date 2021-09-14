@@ -1,69 +1,77 @@
 import React, { useState } from "react"
-import { gql, useQuery } from "@apollo/client"
-import { Container, Grid, Fab, Modal } from "@material-ui/core"
+import { useQuery, useMutation } from "@apollo/client"
+import { Button, Container, Grid, Fab, Modal } from "@material-ui/core"
 import { Add } from "@material-ui/icons"
-import { nanoid } from "nanoid"
-import axios from "axios"
 
 import Layout from "../components/layout"
 import Seo from "../components/seo"
 import RecipeCard from "../components/recipe-card"
 import RecipeForm from "../components/recipe-form"
 
-const GET_RECIPES = gql`
-  query {
-    allRecipes {
-      data {
-        id
-        title
-        description
-        image
-        date
-        ingredients {
-          key
-          item
-          amount
-          unit
-        }
-        method {
-          key
-          text
-        }
-      }
-    }
-  }
-`
+import { login, isAuthenticated, getProfile } from "../utils/auth"
 
-const Recipes = () => {
-  const [addRecipe, setAddRecipe] = useState(false)
+import { ADD_RECIPE, GET_RECIPES } from "../apollo/queries"
 
-  const { loading, error, data } = useQuery(GET_RECIPES)
-
-  const recipes = !loading && !error ? data.allRecipes.data : null
+const RecipeFormModal = ({ viewAddRecipeForm, setViewAddRecipeForm }) => {
+  const [addNewRecipe, { data, loading, error }] = useMutation(ADD_RECIPE, {
+    refetchQueries: [GET_RECIPES],
+  })
 
   const handleSubmit = async newRecipe => {
     try {
-      await axios.post("/.netlify/functions/add-new-recipe", newRecipe)
-      setAddRecipe(false)
+      await addNewRecipe({ variables: { data: newRecipe } })
+      setViewAddRecipeForm(false)
     } catch (er) {
       console.log(er.message)
     }
   }
 
   return (
+    <Modal open={viewAddRecipeForm} onClose={() => setViewAddRecipeForm(false)}>
+      <RecipeForm handleSubmit={handleSubmit} />
+    </Modal>
+  )
+}
+
+const Recipes = () => {
+  const [viewAddRecipeForm, setViewAddRecipeForm] = useState(false)
+
+  const { loading, error, data } = useQuery(GET_RECIPES)
+
+  const recipes = !loading && !error ? data.allRecipes.data : null
+
+  console.log(recipes)
+
+  return (
     <Layout>
       <Seo title="Recipes" />
       <h1>These are your recipes</h1>
-      <Fab
-        color="secondary"
-        aria-label="add"
-        onClick={() => setAddRecipe(!addRecipe)}
-      >
-        <Add />
-      </Fab>
-      <Modal open={addRecipe} onClose={() => setAddRecipe(false)}>
-        <RecipeForm handleSubmit={handleSubmit} />
-      </Modal>
+      {!isAuthenticated() ? (
+        <div>
+          You must login to post recipes:
+          <Button
+            variant="contained"
+            onClick={e => {
+              login()
+              e.preventDefault()
+            }}
+          >
+            Login
+          </Button>
+        </div>
+      ) : (
+        <Fab
+          color="secondary"
+          aria-label="add"
+          onClick={() => setViewAddRecipeForm(!viewAddRecipeForm)}
+        >
+          <Add />
+        </Fab>
+      )}
+      <RecipeFormModal
+        viewAddRecipeForm={viewAddRecipeForm}
+        setViewAddRecipeForm={setViewAddRecipeForm}
+      />
       <Grid
         container
         spacing={2}
@@ -72,9 +80,10 @@ const Recipes = () => {
       >
         {loading && <p>loading...</p>}
         {error && <p> Error: {error.message}</p>}
+        {recipes && recipes.length === 0 && <p>No recipes . . .</p>}
         {recipes &&
           recipes.map(r => (
-            <Grid key={nanoid()} item xs={12} sm={6} lg={4}>
+            <Grid key={r._id} item xs={12} sm={6} lg={4}>
               <Container>
                 <RecipeCard recipe={r} />
               </Container>

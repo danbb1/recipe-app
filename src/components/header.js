@@ -1,18 +1,23 @@
 import React, { useState } from "react"
 import PropTypes from "prop-types"
 import { Link as GatsbyLink } from "gatsby"
+import { red } from "@material-ui/core/colors"
 import {
   makeStyles,
   useTheme,
+  Avatar,
   AppBar,
   Drawer,
   Hidden,
   Link,
   Toolbar,
   Typography,
+  Button,
   IconButton,
 } from "@material-ui/core"
 import { Menu } from "@material-ui/icons"
+
+import { login, logout, isAuthenticated, getProfile } from "../utils/auth"
 
 import DrawerInner from "./drawer"
 
@@ -39,6 +44,10 @@ const useStyles = makeStyles(theme => ({
       display: "none",
     },
   },
+  avatar: {
+    marginRight: theme.spacing(1),
+    backgroundColor: red[500],
+  },
   title: {
     flexGrow: 1,
     color: "#ffffff",
@@ -60,6 +69,10 @@ const Header = ({ siteTitle, drawerWidth }) => {
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen)
 
+  const user = getProfile()
+
+  console.log(user)
+
   return (
     <div className={classes.root}>
       <AppBar position="static" className={classes.appBar}>
@@ -78,6 +91,35 @@ const Header = ({ siteTitle, drawerWidth }) => {
               {siteTitle}
             </Link>
           </Typography>
+          {isAuthenticated() ? (
+            <>
+              <Link component={GatsbyLink} to="/account/" color="inherit">
+                <Avatar aria-label="user" className={classes.avatar}>
+                  {user.name.slice(0, 1).toUpperCase()}
+                </Avatar>{" "}
+              </Link>
+
+              <Button
+                variant="contained"
+                onClick={e => {
+                  logout()
+                  e.preventDefault()
+                }}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="contained"
+              onClick={e => {
+                login()
+                e.preventDefault()
+              }}
+            >
+              Login
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
       <nav>
