@@ -2,6 +2,7 @@ module.exports = {
   env: {
     browser: true,
     es2021: true,
+    "jest/globals": true,
   },
   extends: ["plugin:react/recommended", "airbnb", "prettier"],
   parserOptions: {
@@ -11,7 +12,7 @@ module.exports = {
     ecmaVersion: 12,
     sourceType: "module",
   },
-  plugins: ["react", "prettier"],
+  plugins: ["react", "prettier", "jest"],
   rules: {
     "jsx-a11y/label-has-associated-control": [
       2,
@@ -24,6 +25,13 @@ module.exports = {
     ],
     "react/jsx-filename-extension": [1, { extensions: [".js", ".jsx"] }],
     "prettier/prettier": "error",
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        devDependencies: true,
+        optionalDependencies: false,
+        peerDependencies: false,
+      },
+    ],
   },
 }
-

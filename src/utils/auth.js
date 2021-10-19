@@ -23,9 +23,7 @@ const tokens = {
 let user = {}
 
 export const isAuthenticated = () => {
-  if (!isBrowser) {
-    return
-  }
+  if (!isBrowser) return
 
   return localStorage.getItem("isLoggedIn") === "true"
 }

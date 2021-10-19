@@ -61,15 +61,13 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-const Header = ({ siteTitle, drawerWidth }) => {
+const Header = ({ siteTitle, drawerWidth, user, isAuthenticated }) => {
   const theme = useTheme()
   const classes = useStyles(drawerWidth)
 
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen)
-
-  const user = getProfile()
 
   return (
     <div className={classes.root}>
@@ -89,7 +87,7 @@ const Header = ({ siteTitle, drawerWidth }) => {
               {siteTitle}
             </Link>
           </Typography>
-          {isAuthenticated() ? (
+          {isAuthenticated ? (
             <>
               <Link component={GatsbyLink} to="/account/" color="inherit">
                 {user.picture ? (
