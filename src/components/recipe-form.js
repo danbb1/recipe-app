@@ -352,8 +352,6 @@ const RecipeForm = React.forwardRef((props, ref) => {
                 handleChange={handleChange}
               />
             </Grid>
-            <div>Errors: {JSON.stringify(errors, null, 2)}</div>
-            <div>Values: {JSON.stringify(values, null, 2)}</div>
           </Form>
         )}
       </Formik>

@@ -17,6 +17,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  Tooltip,
 } from "@material-ui/core"
 import { red } from "@material-ui/core/colors"
 import {
@@ -30,15 +31,14 @@ import { nanoid } from "nanoid"
 
 import RecipeForm from "./recipe-form"
 
-import { GET_RECIPES, UPDATE_RECIPE, DELETE_RECIPE } from "../apollo/queries"
-
-const ADD_RECIPE = gql`
-  mutation ($data: RecipeInput!) {
-    createRecipe(data: $data) {
-      title
-    }
-  }
-`
+import {
+  GET_RECIPES,
+  UPDATE_RECIPE,
+  DELETE_RECIPE,
+  UPDATE_USER,
+  GET_USER_FAVORITES,
+} from "../apollo/queries"
+import { isAuthenticated } from "../utils/auth"
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -71,7 +71,13 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-const ViewMoreMenu = ({ anchorEl, handleViewMoreMenuClose, recipe, setEditRecipe }) => {
+const ViewMoreMenu = ({
+  anchorEl,
+  handleViewMoreMenuClose,
+  recipe,
+  user,
+  setEditRecipe,
+}) => {
   const [deleteRecipe] = useMutation(DELETE_RECIPE, {
     refetchQueries: [GET_RECIPES],
   })
@@ -85,14 +91,27 @@ const ViewMoreMenu = ({ anchorEl, handleViewMoreMenuClose, recipe, setEditRecipe
       onClose={handleViewMoreMenuClose}
     >
       <MenuItem onClick={() => setEditRecipe(true)}>Edit</MenuItem>
-      <MenuItem onClick={() => deleteRecipe({ variables: { id: recipe._id } })}>
-        Delete
-      </MenuItem>
+      <Tooltip
+        title="Only recipe authors can delete recipes"
+        disableHoverListener={user.sub === recipe.user.authId}
+        disableTouchListener={user.sub === recipe.user.authId}
+        disableFocusListener={user.sub === recipe.user.authId}
+      >
+        <span>
+          <MenuItem
+            disabled={user.sub !== recipe.user.authId}
+            // eslint-disable-next-line no-underscore-dangle
+            onClick={() => deleteRecipe({ variables: { id: recipe._id } })}
+          >
+            Delete
+          </MenuItem>
+        </span>
+      </Tooltip>
     </Menu>
   )
 }
 
-const RecipeCard = ({ recipe }) => {
+const RecipeCard = ({ recipe, user, userFavorites }) => {
   const classes = useStyles()
   const [expanded, setExpanded] = useState()
   const [menuAnchorEl, setMenuAnchorEl] = useState(null)
@@ -125,8 +144,18 @@ const RecipeCard = ({ recipe }) => {
 
   const handleViewMoreMenuClose = () => setMenuAnchorEl(null)
 
-  const [updateRecipe, { data, loading, error }] = useMutation(UPDATE_RECIPE, {
+  const [
+    updateRecipe,
+    { data: recipeData, loading: recipeLoading, error: recipeError },
+  ] = useMutation(UPDATE_RECIPE, {
     refetchQueries: [GET_RECIPES],
+  })
+
+  const [
+    updateUser,
+    { data: userData, loading: userLoading, error: userError },
+  ] = useMutation(UPDATE_USER, {
+    refetchQueries: [GET_USER_FAVORITES],
   })
 
   const handleSubmit = async newRecipe => {
@@ -139,20 +168,31 @@ const RecipeCard = ({ recipe }) => {
   }
 
   const handleFavorite = () => {
-    const newRecipe = {
-      ...recipeGraphQlShape,
-      favorite: !recipe.favorite
-    }
-    updateRecipe({ variables: { id: recipe._id, data: newRecipe } })
+    const newUserFavourites = userFavorites.includes(recipe._id)
+      ? userFavorites.filter(f => f !== recipe._id)
+      : [...userFavorites, recipe._id]
+    updateUser({
+      variables: {
+        id: user.fauna_id,
+        data: {
+          authId: user.sub,
+          favorites: newUserFavourites,
+        },
+      },
+    })
   }
 
   return (
     <Card className={classes.root}>
       <CardHeader
         avatar={
-          <Avatar aria-label="user" className={classes.avatar}>
-            R
-          </Avatar>
+          recipe.user.avatar.length > 1 ? (
+            <Avatar alt="Recipe avatar" src={recipe.user.avatar} />
+          ) : (
+            <Avatar aria-label="user" className={classes.avatar}>
+              {recipe.user.avatar}
+            </Avatar>
+          )
         }
         action={
           <IconButton aria-label="settings" onClick={handleViewMoreMenuOpen}>
@@ -166,6 +206,7 @@ const RecipeCard = ({ recipe }) => {
         anchorEl={menuAnchorEl}
         handleViewMoreMenuClose={handleViewMoreMenuClose}
         recipe={recipe}
+        user={user}
         setEditRecipe={setEditRecipe}
       />
       <Modal open={editRecipe} onClose={() => setEditRecipe(false)}>
@@ -186,8 +227,18 @@ const RecipeCard = ({ recipe }) => {
         </Typography>
       </CardContent>
       <CardActions disableSpacing>
-        <IconButton aria-label="add to favorites" onClick={handleFavorite}>
-          <Favorite color={recipe.favorite ? "error" : ""} />
+        <IconButton
+          disabled={!isAuthenticated()}
+          aria-label="add to favorites"
+          onClick={handleFavorite}
+        >
+          <Favorite
+            color={
+              userFavorites && userFavorites.includes(recipe._id)
+                ? "error"
+                : "inherit"
+            }
+          />
         </IconButton>
         <IconButton aria-label="share">
           <Share />

@@ -11,7 +11,10 @@ type Step @embedded {
 }
 
 type User {
-  favorites: [Recipe] @relation
+  authId: String!
+  favorites: [String!]
+  recipes: [Recipe] @relation(name: "recipe_author")
+  avatar: String
 }
 
 type Recipe {
@@ -21,9 +24,11 @@ type Recipe {
   date: String!
   ingredients: [Ingredient!]! 
   method: [Step!]!
-  user: User!
+  user: User! @relation(name: "recipe_author")
 }
 
 type Query {
   allRecipes: [Recipe]
+  allUsers: [User]
+  getUserByAuthId(authId: String!): User
 }

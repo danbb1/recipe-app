@@ -7,7 +7,7 @@ import Layout from "../components/layout"
 import Seo from "../components/seo"
 
 const IndexPage = () => {
-  const user = getProfile()
+  const user = isAuthenticated ? getProfile() : null
 
   return (
     <Layout>

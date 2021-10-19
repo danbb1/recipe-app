@@ -6,7 +6,10 @@ export const GET_RECIPES = gql`
       data {
         _id
         title
-        favorite
+        user {
+          authId
+          avatar
+        }
         description
         image
         date
@@ -45,6 +48,39 @@ export const DELETE_RECIPE = gql`
   mutation ($id: ID!) {
     deleteRecipe(id: $id) {
       title
+    }
+  }
+`
+
+export const FIND_USER_BY_ID = gql`
+  query ($authId: String!) {
+    getUserByAuthId(authId: $authId) {
+      authId
+      _id
+    }
+  }
+`
+
+export const GET_USER_FAVORITES = gql`
+  query ($authId: String!) {
+    getUserByAuthId(authId: $authId) {
+      favorites
+    }
+  }
+`
+
+export const ADD_USER = gql`
+  mutation ($data: UserInput!) {
+    createUser(data: $data) {
+      id
+    }
+  }
+`
+
+export const UPDATE_USER = gql`
+  mutation ($id: ID!, $data: UserInput!) {
+    updateUser(id: $id, data: $data) {
+      favorites
     }
   }
 `

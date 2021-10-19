@@ -71,8 +71,6 @@ const Header = ({ siteTitle, drawerWidth }) => {
 
   const user = getProfile()
 
-  console.log(user)
-
   return (
     <div className={classes.root}>
       <AppBar position="static" className={classes.appBar}>
@@ -94,9 +92,17 @@ const Header = ({ siteTitle, drawerWidth }) => {
           {isAuthenticated() ? (
             <>
               <Link component={GatsbyLink} to="/account/" color="inherit">
-                <Avatar aria-label="user" className={classes.avatar}>
-                  {user.name.slice(0, 1).toUpperCase()}
-                </Avatar>{" "}
+                {user.picture ? (
+                  <Avatar
+                    alt="Recipe avatar"
+                    className={classes.avatar}
+                    src={user.picture}
+                  />
+                ) : (
+                  <Avatar aria-label="user" className={classes.avatar}>
+                    {user.nickname.slice(0, 1).toUpperCase()}
+                  </Avatar>
+                )}
               </Link>
 
               <Button

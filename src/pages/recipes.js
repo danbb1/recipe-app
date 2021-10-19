@@ -10,14 +10,21 @@ import RecipeForm from "../components/recipe-form"
 
 import { login, isAuthenticated, getProfile } from "../utils/auth"
 
-import { ADD_RECIPE, GET_RECIPES } from "../apollo/queries"
+import { ADD_RECIPE, GET_RECIPES, GET_USER_FAVORITES } from "../apollo/queries"
 
-const RecipeFormModal = ({ viewAddRecipeForm, setViewAddRecipeForm }) => {
-  const [addNewRecipe, { data, loading, error }] = useMutation(ADD_RECIPE, {
+const RecipeFormModal = ({ viewAddRecipeForm, setViewAddRecipeForm, user }) => {
+  const [addNewRecipe, { loading, error }] = useMutation(ADD_RECIPE, {
     refetchQueries: [GET_RECIPES],
   })
 
-  const handleSubmit = async newRecipe => {
+  const handleSubmit = async recipe => {
+    const newRecipe = {
+      ...recipe,
+      user: {
+        // eslint-disable-next-line no-underscore-dangle
+        connect: user.fauna_id,
+      },
+    }
     try {
       await addNewRecipe({ variables: { data: newRecipe } })
       setViewAddRecipeForm(false)
@@ -36,11 +43,27 @@ const RecipeFormModal = ({ viewAddRecipeForm, setViewAddRecipeForm }) => {
 const Recipes = () => {
   const [viewAddRecipeForm, setViewAddRecipeForm] = useState(false)
 
-  const { loading, error, data } = useQuery(GET_RECIPES)
+  const user = getProfile()
 
-  const recipes = !loading && !error ? data.allRecipes.data : null
+  const {
+    loading: recipeLoading,
+    error: recipeError,
+    data: recipeData,
+  } = useQuery(GET_RECIPES)
 
-  console.log(recipes)
+  const {
+    loading: userLoading,
+    error: userError,
+    data: userData,
+  } = useQuery(GET_USER_FAVORITES, { variables: { authId: user.sub } })
+
+  const recipes =
+    !recipeLoading && !recipeError ? recipeData.allRecipes.data : null
+
+  const userFavorites =
+    !userLoading && !userError ? userData.getUserByAuthId.favorites : null
+
+  console.log("recipes", recipes, "user favorites", userFavorites)
 
   return (
     <Layout>
@@ -71,6 +94,7 @@ const Recipes = () => {
       <RecipeFormModal
         viewAddRecipeForm={viewAddRecipeForm}
         setViewAddRecipeForm={setViewAddRecipeForm}
+        user={user}
       />
       <Grid
         container
@@ -78,14 +102,18 @@ const Recipes = () => {
         justifyContent="space-around"
         alignItems="flex-start"
       >
-        {loading && <p>loading...</p>}
-        {error && <p> Error: {error.message}</p>}
+        {recipeLoading && <p>loading...</p>}
+        {recipeError && <p> Error: {recipeError.message}</p>}
         {recipes && recipes.length === 0 && <p>No recipes . . .</p>}
         {recipes &&
           recipes.map(r => (
             <Grid key={r._id} item xs={12} sm={6} lg={4}>
               <Container>
-                <RecipeCard recipe={r} />
+                <RecipeCard
+                  recipe={r}
+                  user={user}
+                  userFavorites={userFavorites && userFavorites}
+                />
               </Container>
             </Grid>
           ))}

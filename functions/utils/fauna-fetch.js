@@ -11,7 +11,5 @@ exports.faunaFetch = async ({ query, variables }) => {
     .post("http://localhost:8084/graphql", { query, variables }, config)
     .catch(err => console.error(err))
 
-  console.log(response.data)
-
   return response.data
 }

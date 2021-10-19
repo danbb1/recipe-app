@@ -1,5 +1,6 @@
 import auth0 from "auth0-js"
 import { navigate } from "gatsby"
+import axios from "axios"
 
 const isBrowser = typeof window !== "undefined"
 
@@ -39,7 +40,7 @@ export const login = () => {
 
 const setSession =
   (cb = () => {}) =>
-  (err, authResult) => {
+  async (err, authResult) => {
     if (err) {
       navigate("/")
       cb()
@@ -52,6 +53,24 @@ const setSession =
       tokens.idToken = authResult.idToken
       tokens.expiresAt = expiresAt
       user = authResult.idTokenPayload
+      if (user) {
+        try {
+          const faunaUserId = await axios.post(
+            "/.netlify/functions/validate-fauna-user",
+            {
+              id: user.sub,
+              avatar: user.picture
+                ? user.picture
+                : user.nickname.slice(0, 1).toUpperCase(),
+            }
+          )
+          if (faunaUserId) {
+            user.fauna_id = faunaUserId.data.id
+          }
+        } catch (e) {
+          console.log(e)
+        }
+      }
       localStorage.setItem("isLoggedIn", true)
       const loginRedirectRoute = sessionStorage.getItem("recipeAppLoginPath")
       navigate(loginRedirectRoute || "/")
@@ -71,6 +90,7 @@ export const getProfile = () => user
 
 export const silentAuth = callback => {
   if (!isAuthenticated()) return callback()
+  sessionStorage.setItem("recipeAppLoginPath", window.location.pathname)
   auth.checkSession({}, setSession(callback))
 }
 
