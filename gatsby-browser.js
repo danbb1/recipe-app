@@ -1,10 +1,6 @@
-/**
- * Implement Gatsby's Browser APIs in this file.
- *
- * See: https://www.gatsbyjs.com/docs/browser-apis/
- */
+/* eslint-disable import/prefer-default-export */
+import PropTypes from "prop-types"
 
-// You can delete this file if you're not using it
 import React, { useState, useEffect } from "react"
 import { silentAuth } from "./src/utils/auth"
 
@@ -25,3 +21,7 @@ const SessionCheck = ({ children }) => {
 export const wrapRootElement = ({ element }) => (
   <SessionCheck>{element}</SessionCheck>
 )
+
+SessionCheck.propTypes = {
+  children: PropTypes.node.isRequired,
+}

@@ -17,7 +17,7 @@ import {
 } from "@material-ui/core"
 import { Menu } from "@material-ui/icons"
 
-import { login, logout, isAuthenticated, getProfile } from "../utils/auth"
+import { login, logout } from "../utils/auth"
 
 import DrawerInner from "./drawer"
 
@@ -162,3 +162,17 @@ Header.defaultProps = {
 }
 
 export default Header
+
+Header.propTypes = {
+  drawerWidth: PropTypes.number.isRequired,
+  user: PropTypes.shape({
+    picture: PropTypes.string,
+    nickname: PropTypes.string,
+  }),
+  isAuthenticated: PropTypes.bool,
+}
+
+Header.defaultProps = {
+  user: {},
+  isAuthenticated: false,
+}

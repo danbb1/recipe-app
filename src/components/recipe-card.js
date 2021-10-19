@@ -1,5 +1,7 @@
+/* eslint-disable no-underscore-dangle */
 import React, { useState } from "react"
-import { gql, useMutation } from "@apollo/client"
+import PropTypes from "prop-types"
+import { useMutation } from "@apollo/client"
 import {
   makeStyles,
   Card,
@@ -116,6 +118,12 @@ const RecipeCard = ({ recipe, user, userFavorites }) => {
   const [expanded, setExpanded] = useState()
   const [menuAnchorEl, setMenuAnchorEl] = useState(null)
   const [editRecipe, setEditRecipe] = useState(false)
+  const today = new Date()
+  const formattedToday = `${today.getFullYear()}-${
+    today.getMonth() + 1 < 10
+      ? `0${today.getMonth() + 1}`
+      : today.getMonth() + 1
+  }-${today.getDate() < 10 ? `0${today.getDate()}` : today.getDate()}`
 
   const recipeGraphQlShape = recipe
     ? {
@@ -144,22 +152,17 @@ const RecipeCard = ({ recipe, user, userFavorites }) => {
 
   const handleViewMoreMenuClose = () => setMenuAnchorEl(null)
 
-  const [
-    updateRecipe,
-    { data: recipeData, loading: recipeLoading, error: recipeError },
-  ] = useMutation(UPDATE_RECIPE, {
+  const [updateRecipe] = useMutation(UPDATE_RECIPE, {
     refetchQueries: [GET_RECIPES],
   })
 
-  const [
-    updateUser,
-    { data: userData, loading: userLoading, error: userError },
-  ] = useMutation(UPDATE_USER, {
+  const [updateUser] = useMutation(UPDATE_USER, {
     refetchQueries: [GET_USER_FAVORITES],
   })
 
   const handleSubmit = async newRecipe => {
     try {
+      // eslint-disable-next-line no-underscore-dangle
       await updateRecipe({ variables: { id: recipe._id, data: newRecipe } })
       setEditRecipe(false)
     } catch (er) {
@@ -168,6 +171,7 @@ const RecipeCard = ({ recipe, user, userFavorites }) => {
   }
 
   const handleFavorite = () => {
+    // eslint-disable-next-line no-underscore-dangle
     const newUserFavourites = userFavorites.includes(recipe._id)
       ? userFavorites.filter(f => f !== recipe._id)
       : [...userFavorites, recipe._id]
@@ -283,3 +287,56 @@ const RecipeCard = ({ recipe, user, userFavorites }) => {
 }
 
 export default RecipeCard
+
+ViewMoreMenu.propTypes = {
+  anchorEl: PropTypes.node.isRequired,
+  handleViewMoreMenuClose: PropTypes.func.isRequired,
+  recipe: PropTypes.shape({
+    _id: PropTypes.string,
+    user: PropTypes.shape({
+      authId: PropTypes.string,
+    }),
+  }).isRequired,
+  user: PropTypes.shape({
+    sub: PropTypes.string,
+  }).isRequired,
+  setEditRecipe: PropTypes.func.isRequired,
+}
+
+RecipeCard.propTypes = {
+  recipe: PropTypes.shape({
+    _id: PropTypes.string,
+    title: PropTypes.string,
+    image: PropTypes.string,
+    description: PropTypes.string,
+    date: PropTypes.string,
+    ingredients: PropTypes.arrayOf(
+      PropTypes.shape({
+        item: PropTypes.string,
+        amount: PropTypes.number,
+        unit: PropTypes.string,
+        key: PropTypes.string,
+      })
+    ),
+    method: PropTypes.arrayOf(
+      PropTypes.shape({
+        text: PropTypes.string,
+        key: PropTypes.string,
+      })
+    ),
+    user: PropTypes.shape({
+      avatar: PropTypes.string,
+    }),
+  }),
+  user: PropTypes.shape({
+    fauna_id: PropTypes.string,
+    sub: PropTypes.string,
+  }),
+  userFavorites: PropTypes.arrayOf(PropTypes.string),
+}
+
+RecipeCard.defaultProps = {
+  recipe: undefined,
+  user: {},
+  userFavorites: [],
+}
