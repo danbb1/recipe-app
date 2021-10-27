@@ -67,7 +67,9 @@ const Header = ({ siteTitle, drawerWidth, user, isAuthenticated }) => {
 
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  const handleDrawerToggle = () => setMobileOpen(!mobileOpen)
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen)
+  }
 
   return (
     <div className={classes.root}>
@@ -87,7 +89,7 @@ const Header = ({ siteTitle, drawerWidth, user, isAuthenticated }) => {
               {siteTitle}
             </Link>
           </Typography>
-          {isAuthenticated ? (
+          {isAuthenticated && user ? (
             <>
               <Link component={GatsbyLink} to="/account/" color="inherit">
                 {user.picture ? (
@@ -117,6 +119,7 @@ const Header = ({ siteTitle, drawerWidth, user, isAuthenticated }) => {
             <Button
               variant="contained"
               onClick={e => {
+                console.log("login attempted")
                 login()
                 e.preventDefault()
               }}

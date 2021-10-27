@@ -28,7 +28,7 @@ const DrawerInner = () => {
           </ListItemIcon>
           <ListItemText primary="Home" />
         </ListItem>
-        {["Recipes", "Meal Planner", "Photos"].map(t => (
+        {["Recipes"].map(t => (
           <ListItem
             button
             key={t}

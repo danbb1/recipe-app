@@ -6,9 +6,9 @@ const isBrowser = typeof window !== "undefined"
 
 const auth = isBrowser
   ? new auth0.WebAuth({
-      domain: process.env.GATSBY_AUTH0_DOMAIN,
+      domain: process.env.GATSBY_AUTH0_DOMAIN || null,
       clientID: process.env.GATSBY_AUTH0_CLIENTID,
-      redirectUri: process.env.GATSBY_AUTH0_CALLBACK,
+      redirectUri: process.env.GATSBY_AUTH0_CALLBACK || null,
       responseType: "token id_token",
       scope: "openid profile email",
     })
@@ -22,11 +22,8 @@ const tokens = {
 
 let user = {}
 
-export const isAuthenticated = () => {
-  if (!isBrowser) return
-
-  return localStorage.getItem("isLoggedIn") === "true"
-}
+export const isAuthenticated = () =>
+  isBrowser ? Boolean(localStorage.getItem("isLoggedIn")) : false
 
 export const login = () => {
   if (!isBrowser) {
@@ -89,7 +86,11 @@ export const getProfile = () => user
 export const silentAuth = callback => {
   if (!isAuthenticated()) return callback()
   sessionStorage.setItem("recipeAppLoginPath", window.location.pathname)
-  auth.checkSession({}, setSession(callback))
+  try {
+    auth.checkSession({}, setSession(callback))
+  } catch (error) {
+    console.log("there was an error", error)
+  }
 }
 
 export const logout = () => {

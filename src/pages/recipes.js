@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import PropTypes from "prop-types"
 import { useQuery, useMutation } from "@apollo/client"
 import { Button, Container, Grid, Fab, Modal } from "@material-ui/core"
 import { Add } from "@material-ui/icons"
@@ -13,7 +14,7 @@ import { login, isAuthenticated, getProfile } from "../utils/auth"
 import { ADD_RECIPE, GET_RECIPES, GET_USER_FAVORITES } from "../apollo/queries"
 
 const RecipeFormModal = ({ viewAddRecipeForm, setViewAddRecipeForm, user }) => {
-  const [addNewRecipe, { loading, error }] = useMutation(ADD_RECIPE, {
+  const [addNewRecipe] = useMutation(ADD_RECIPE, {
     refetchQueries: [GET_RECIPES],
   })
 
@@ -63,8 +64,6 @@ const Recipes = () => {
   const userFavorites =
     !userLoading && !userError ? userData.getUserByAuthId.favorites : null
 
-  console.log("recipes", recipes, "user favorites", userFavorites)
-
   return (
     <Layout>
       <Seo title="Recipes" />
@@ -106,11 +105,12 @@ const Recipes = () => {
         {recipeError && <p> Error: {recipeError.message}</p>}
         {recipes && recipes.length === 0 && <p>No recipes . . .</p>}
         {recipes &&
-          recipes.map(r => (
-            <Grid key={r._id} item xs={12} sm={6} lg={4}>
+          recipes.map(recipe => (
+            // eslint-disable-next-line no-underscore-dangle
+            <Grid key={recipe._id} item xs={12} sm={6} lg={4}>
               <Container>
                 <RecipeCard
-                  recipe={r}
+                  recipe={recipe}
                   user={user}
                   userFavorites={userFavorites && userFavorites}
                 />
@@ -123,3 +123,11 @@ const Recipes = () => {
 }
 
 export default Recipes
+
+RecipeFormModal.propTypes = {
+  viewAddRecipeForm: PropTypes.bool.isRequired,
+  setViewAddRecipeForm: PropTypes.func.isRequired,
+  user: PropTypes.shape({
+    fauna_id: PropTypes.string,
+  }).isRequired,
+}

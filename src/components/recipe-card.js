@@ -92,7 +92,21 @@ const ViewMoreMenu = ({
       open={Boolean(anchorEl)}
       onClose={handleViewMoreMenuClose}
     >
-      <MenuItem onClick={() => setEditRecipe(true)}>Edit</MenuItem>
+      <Tooltip
+        title="Only recipe authors can edit recipes"
+        disableHoverListener={user.sub === recipe.user.authId}
+        disableTouchListener={user.sub === recipe.user.authId}
+        disableFocusListener={user.sub === recipe.user.authId}
+      >
+        <span>
+          <MenuItem
+            disabled={user.sub !== recipe.user.authId}
+            onClick={() => setEditRecipe(true)}
+          >
+            Edit
+          </MenuItem>
+        </span>
+      </Tooltip>
       <Tooltip
         title="Only recipe authors can delete recipes"
         disableHoverListener={user.sub === recipe.user.authId}
@@ -204,7 +218,7 @@ const RecipeCard = ({ recipe, user, userFavorites }) => {
           </IconButton>
         }
         title={recipe.title}
-        subheader={new Date().toLocaleDateString()}
+        subheader={new Date(recipe.date).toLocaleDateString()}
       />
       <ViewMoreMenu
         anchorEl={menuAnchorEl}
@@ -289,7 +303,7 @@ const RecipeCard = ({ recipe, user, userFavorites }) => {
 export default RecipeCard
 
 ViewMoreMenu.propTypes = {
-  anchorEl: PropTypes.node.isRequired,
+  anchorEl: PropTypes.node,
   handleViewMoreMenuClose: PropTypes.func.isRequired,
   recipe: PropTypes.shape({
     _id: PropTypes.string,
@@ -303,6 +317,10 @@ ViewMoreMenu.propTypes = {
   setEditRecipe: PropTypes.func.isRequired,
 }
 
+ViewMoreMenu.defaultProps = {
+  anchorEl: null,
+}
+
 RecipeCard.propTypes = {
   recipe: PropTypes.shape({
     _id: PropTypes.string,
@@ -313,7 +331,7 @@ RecipeCard.propTypes = {
     ingredients: PropTypes.arrayOf(
       PropTypes.shape({
         item: PropTypes.string,
-        amount: PropTypes.number,
+        amount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
         unit: PropTypes.string,
         key: PropTypes.string,
       })

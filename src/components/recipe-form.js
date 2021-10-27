@@ -1,4 +1,5 @@
-import React, { useEffect } from "react"
+import React from "react"
+import PropTypes from "prop-types"
 import { Formik, Form, Field, FieldArray, useField } from "formik"
 import {
   makeStyles,
@@ -360,3 +361,52 @@ const RecipeForm = React.forwardRef((props, ref) => {
 })
 
 export default RecipeForm
+
+CustomSelect.propTypes = {
+  options: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    })
+  ).isRequired,
+  id: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  field: PropTypes.node.isRequired,
+}
+
+IngredientsFieldArray.propTypes = {
+  values: PropTypes.shape({
+    ingredients: PropTypes.arrayOf(
+      PropTypes.shape({
+        key: PropTypes.string,
+        item: PropTypes.string,
+        amount: PropTypes.number,
+        unit: PropTypes.string,
+      })
+    ),
+  }).isRequired,
+  handleBlur: PropTypes.func.isRequired,
+  handleChange: PropTypes.func.isRequired,
+  units: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+}
+
+MethodFieldArray.propTypes = {
+  values: PropTypes.shape({
+    method: PropTypes.arrayOf(
+      PropTypes.shape({
+        key: PropTypes.string,
+        text: PropTypes.string,
+      })
+    ),
+  }).isRequired,
+  handleBlur: PropTypes.func.isRequired,
+  handleChange: PropTypes.func.isRequired,
+}
+
+RecipeForm.propTypes = {
+  handleSubmit: PropTypes.func.isRequired,
+  recipe: PropTypes.shape({}),
+}
+
+RecipeForm.defaultProps = {
+  recipe: undefined,
+}

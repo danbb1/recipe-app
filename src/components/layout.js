@@ -36,8 +36,8 @@ const Layout = ({ children }) => {
       <Header
         siteTitle={data.site.siteMetadata?.title || `Title`}
         drawerWidth={drawerWidth}
-        user={() => getProfile()}
-        isAuthenticated={() => isAuthenticated()}
+        user={getProfile()}
+        isAuthenticated={isAuthenticated()}
       />
       <div className={classes.root}>
         <main>{children}</main>
