@@ -17,7 +17,7 @@ import {
 } from "@material-ui/core"
 import { Menu } from "@material-ui/icons"
 
-import { login, logout } from "../utils/auth"
+import { isAuthenticated, getProfile, login, logout } from "../utils/auth"
 
 import DrawerInner from "./drawer"
 
@@ -61,7 +61,7 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-const Header = ({ siteTitle, drawerWidth, user, isAuthenticated }) => {
+const Header = ({ siteTitle, drawerWidth }) => {
   const theme = useTheme()
   const classes = useStyles(drawerWidth)
 
@@ -70,6 +70,8 @@ const Header = ({ siteTitle, drawerWidth, user, isAuthenticated }) => {
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
   }
+
+  const user = isAuthenticated ? getProfile() : {}
 
   return (
     <div className={classes.root}>
@@ -89,7 +91,7 @@ const Header = ({ siteTitle, drawerWidth, user, isAuthenticated }) => {
               {siteTitle}
             </Link>
           </Typography>
-          {isAuthenticated && user ? (
+          {isAuthenticated() && (
             <>
               <Link component={GatsbyLink} to="/account/" color="inherit">
                 {user.picture ? (
@@ -115,7 +117,8 @@ const Header = ({ siteTitle, drawerWidth, user, isAuthenticated }) => {
                 Logout
               </Button>
             </>
-          ) : (
+          )}
+          {!isAuthenticated() && (
             <Button
               variant="contained"
               onClick={e => {
@@ -176,6 +179,6 @@ Header.propTypes = {
 }
 
 Header.defaultProps = {
-  user: {},
+  user: undefined,
   isAuthenticated: false,
 }

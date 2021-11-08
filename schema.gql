@@ -12,6 +12,7 @@ type Step @embedded {
 
 type User {
   authId: String!
+  nickname: String!
   favorites: [String!]
   recipes: [Recipe] @relation(name: "recipe_author")
   avatar: String

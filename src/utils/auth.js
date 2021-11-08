@@ -23,7 +23,7 @@ const tokens = {
 let user = {}
 
 export const isAuthenticated = () =>
-  isBrowser ? Boolean(localStorage.getItem("isLoggedIn")) : false
+  isBrowser && Boolean(localStorage.getItem("isLoggedIn"))
 
 export const login = () => {
   if (!isBrowser) {
@@ -37,7 +37,9 @@ const setSession =
   (cb = () => {}) =>
   async (err, authResult) => {
     if (err) {
+      console.log("Removing local storage", err)
       navigate("/")
+      localStorage.removeItem("isLoggedIn")
       cb()
       return
     }
@@ -57,6 +59,7 @@ const setSession =
               avatar: user.picture
                 ? user.picture
                 : user.nickname.slice(0, 1).toUpperCase(),
+              nickname: user.nickname,
             }
           )
           if (faunaUserId) {
@@ -85,15 +88,28 @@ export const getProfile = () => user
 
 export const silentAuth = callback => {
   if (!isAuthenticated()) return callback()
-  sessionStorage.setItem("recipeAppLoginPath", window.location.pathname)
+  sessionStorage.setItem(
+    "recipeAppLoginPath",
+    window.location.pathname !== "/callback" ? window.location.pathname : "/"
+  )
   try {
     auth.checkSession({}, setSession(callback))
   } catch (error) {
-    console.log("there was an error", error)
+    localStorage.setItem("isLoggedIn", false)
   }
 }
 
 export const logout = () => {
-  localStorage.setItem("isLoggedIn", false)
+  localStorage.removeItem("isLoggedIn")
   auth.logout()
+}
+
+export const resetPassword = cb => {
+  auth.changePassword(
+    {
+      email: user.email,
+      connection: "Username-Password-Authentication",
+    },
+    res => cb(res)
+  )
 }

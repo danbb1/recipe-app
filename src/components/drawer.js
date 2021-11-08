@@ -9,6 +9,7 @@ import {
 } from "@material-ui/core"
 import { Home } from "@material-ui/icons"
 import { Link } from "gatsby"
+import { isAuthenticated } from "../utils/auth"
 
 const useStyles = makeStyles(theme => ({
   toolbar: theme.mixins.toolbar,
@@ -28,16 +29,24 @@ const DrawerInner = () => {
           </ListItemIcon>
           <ListItemText primary="Home" />
         </ListItem>
-        {["Recipes"].map(t => (
+        {[
+          { label: "Your Recipes", link: "recipes" },
+          { label: "Explore", link: "explore" },
+        ].map(link => (
           <ListItem
             button
-            key={t}
+            key={`${link.label}-key`}
             component={Link}
-            to={`/${t.toLowerCase().trim().split(/\s+/).join("-")}/`}
+            to={`/${link.link.toLowerCase().trim().split(/\s+/).join("-")}/`}
           >
-            <ListItemText inset primary={t} />
+            <ListItemText inset primary={link.label} />
           </ListItem>
         ))}
+        {isAuthenticated() && (
+          <ListItem button component={Link} to="/account/">
+            <ListItemText inset primary="Account" />
+          </ListItem>
+        )}
       </List>
     </div>
   )

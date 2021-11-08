@@ -38,15 +38,19 @@ import {
   UPDATE_RECIPE,
   DELETE_RECIPE,
   UPDATE_USER,
-  GET_USER_FAVORITES,
+  GET_USER_DETAILS,
 } from "../apollo/queries"
+
 import { isAuthenticated } from "../utils/auth"
 
 const useStyles = makeStyles(theme => ({
   root: {
-    [theme.breakpoints.up("sm")]: {
-      maxWidth: 345,
-    },
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+  },
+  actions: {
+    marginTop: "auto",
   },
   media: {
     height: 0,
@@ -171,7 +175,7 @@ const RecipeCard = ({ recipe, user, userFavorites }) => {
   })
 
   const [updateUser] = useMutation(UPDATE_USER, {
-    refetchQueries: [GET_USER_FAVORITES],
+    refetchQueries: [GET_USER_DETAILS],
   })
 
   const handleSubmit = async newRecipe => {
@@ -195,6 +199,7 @@ const RecipeCard = ({ recipe, user, userFavorites }) => {
         data: {
           authId: user.sub,
           favorites: newUserFavourites,
+          nickname: user.nickname,
         },
       },
     })
@@ -244,7 +249,7 @@ const RecipeCard = ({ recipe, user, userFavorites }) => {
           {recipe.description}
         </Typography>
       </CardContent>
-      <CardActions disableSpacing>
+      <CardActions className={`${classes.actions}`} disableSpacing>
         <IconButton
           disabled={!isAuthenticated()}
           aria-label="add to favorites"
@@ -257,9 +262,6 @@ const RecipeCard = ({ recipe, user, userFavorites }) => {
                 : "inherit"
             }
           />
-        </IconButton>
-        <IconButton aria-label="share">
-          <Share />
         </IconButton>
         <IconButton
           className={`${classes.expand} ${expanded ? classes.expandOpen : ""}`}

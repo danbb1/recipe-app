@@ -8,6 +8,7 @@ export const GET_RECIPES = gql`
         title
         user {
           authId
+          nickname
           avatar
         }
         description
@@ -61,10 +62,34 @@ export const FIND_USER_BY_ID = gql`
   }
 `
 
-export const GET_USER_FAVORITES = gql`
+export const GET_USER_DETAILS = gql`
   query ($authId: String!) {
     getUserByAuthId(authId: $authId) {
       favorites
+      nickname
+      recipes {
+        data {
+          _id
+          title
+          user {
+            authId
+            avatar
+          }
+          description
+          image
+          date
+          ingredients {
+            key
+            item
+            amount
+            unit
+          }
+          method {
+            key
+            text
+          }
+        }
+      }
     }
   }
 `

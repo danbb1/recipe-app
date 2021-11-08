@@ -1,9 +1,14 @@
 const { faunaFetch } = require("./utils/fauna-fetch")
 
-exports.handler = async event => {
-  const { id: userId, avatar } = JSON.parse(event.body)
+exports.handler = async ({ body, httpMethod }) => {
+  if (httpMethod !== "POST") {
+    return { statusCode: 405 }
+  }
 
-  const userQuery = `
+  try {
+    const { id: userId, avatar, nickname } = JSON.parse(body)
+
+    const userQuery = `
     query ($authId: String!) {
       getUserByAuthId(authId: $authId) {
         authId
@@ -13,15 +18,13 @@ exports.handler = async event => {
     }
   `
 
-  const queryResult = await faunaFetch({
-    query: userQuery,
-    variables: { authId: userId },
-  })
+    const queryResult = await faunaFetch({
+      query: userQuery,
+      variables: { authId: userId },
+    })
 
-  if (!queryResult.data.getUserByAuthId) {
-    console.log("No user found, creating user...")
-
-    const userMutation = `
+    if (!queryResult.data.getUserByAuthId) {
+      const userMutation = `
       mutation ($data: UserInput!) {
         createUser(data: $data) {
           authId
@@ -31,27 +34,22 @@ exports.handler = async event => {
       }
     `
 
-    const variables = { authId: userId, avatar }
+      const variables = { authId: userId, avatar, nickname }
 
-    const mutationResult = await faunaFetch({
-      query: userMutation,
-      variables: { data: variables },
-    })
+      const mutationResult = await faunaFetch({
+        query: userMutation,
+        variables: { data: variables },
+      })
 
-    console.log("user created", mutationResult)
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        status: "User created",
-        // eslint-disable-next-line no-underscore-dangle
-        id: mutationResult.data.createUser._id,
-      }),
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          status: "User created",
+          // eslint-disable-next-line no-underscore-dangle
+          id: mutationResult.data.createUser._id,
+        }),
+      }
     }
-  }
-
-  if (queryResult.data.getUserByAuthId) {
-    console.log("user found", queryResult)
 
     return {
       statusCode: 200,
@@ -61,10 +59,12 @@ exports.handler = async event => {
         id: queryResult.data.getUserByAuthId._id,
       }),
     }
-  }
+  } catch (err) {
+    console.err(err.message)
 
-  return {
-    statusCode: 500,
-    body: "Error",
+    return {
+      statusCode: 500,
+      body: "Error",
+    }
   }
 }

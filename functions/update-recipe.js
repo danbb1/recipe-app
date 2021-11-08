@@ -1,9 +1,14 @@
 const { faunaFetch } = require("./utils/fauna-fetch")
 
-exports.handler = async event => {
-  const recipe = JSON.parse(event.body)
+exports.handler = async ({ body, httpMethod }) => {
+  if (httpMethod !== "POST") {
+    return { statusCode: 405 }
+  }
 
-  const query = `
+  const recipe = JSON.parse(body)
+
+  try {
+    const query = `
   mutation ($id: ID! $data: RecipeInput!) {
     updateRecipe(id: $id data: $data) {
       title
@@ -11,16 +16,22 @@ exports.handler = async event => {
   }
   `
 
-  const variables = {
-    data: recipe,
-  }
+    const variables = {
+      data: recipe,
+    }
 
-  console.log(variables)
+    await faunaFetch({ query, variables })
 
-  const result = await faunaFetch({ query, variables })
+    return {
+      statusCode: 200,
+      body: "Success",
+    }
+  } catch (err) {
+    console.err(err.message)
 
-  return {
-    statusCode: 200,
-    body: "Success",
+    return {
+      statusCode: 500,
+      body: "There was an error.",
+    }
   }
 }

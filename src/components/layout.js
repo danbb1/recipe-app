@@ -5,7 +5,6 @@ import { CssBaseline, makeStyles } from "@material-ui/core/"
 import "@fontsource/roboto"
 
 import Header from "./header"
-import { getProfile, isAuthenticated } from "../utils/auth"
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -36,8 +35,6 @@ const Layout = ({ children }) => {
       <Header
         siteTitle={data.site.siteMetadata?.title || `Title`}
         drawerWidth={drawerWidth}
-        user={getProfile()}
-        isAuthenticated={isAuthenticated()}
       />
       <div className={classes.root}>
         <main>{children}</main>

@@ -1,7 +1,7 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import PropTypes from "prop-types"
 import { useQuery, useMutation } from "@apollo/client"
-import { Button, Container, Grid, Fab, Modal } from "@material-ui/core"
+import { Button, Grid, Fab, Modal } from "@material-ui/core"
 import { Add } from "@material-ui/icons"
 
 import Layout from "../components/layout"
@@ -11,7 +11,7 @@ import RecipeForm from "../components/recipe-form"
 
 import { login, isAuthenticated, getProfile } from "../utils/auth"
 
-import { ADD_RECIPE, GET_RECIPES, GET_USER_FAVORITES } from "../apollo/queries"
+import { ADD_RECIPE, GET_RECIPES, GET_USER_DETAILS } from "../apollo/queries"
 
 const RecipeFormModal = ({ viewAddRecipeForm, setViewAddRecipeForm, user }) => {
   const [addNewRecipe] = useMutation(ADD_RECIPE, {
@@ -43,26 +43,26 @@ const RecipeFormModal = ({ viewAddRecipeForm, setViewAddRecipeForm, user }) => {
 
 const Recipes = () => {
   const [viewAddRecipeForm, setViewAddRecipeForm] = useState(false)
+  const [userFavorites, setUserFavorites] = useState()
+  const [userRecipes, setUserRecipes] = useState()
 
   const user = getProfile()
-
-  const {
-    loading: recipeLoading,
-    error: recipeError,
-    data: recipeData,
-  } = useQuery(GET_RECIPES)
 
   const {
     loading: userLoading,
     error: userError,
     data: userData,
-  } = useQuery(GET_USER_FAVORITES, { variables: { authId: user.sub } })
+  } = useQuery(GET_USER_DETAILS, { variables: { authId: user.sub } })
 
-  const recipes =
-    !recipeLoading && !recipeError ? recipeData.allRecipes.data : null
+  useEffect(() => {
+    if (userLoading || !userData) return
 
-  const userFavorites =
-    !userLoading && !userError ? userData.getUserByAuthId.favorites : null
+    const { favorites: newUserFavorites, recipes: newUserRecipes } =
+      !userLoading && !userError ? userData.getUserByAuthId : null
+
+    setUserFavorites(newUserFavorites)
+    setUserRecipes(newUserRecipes)
+  }, [userLoading, userData])
 
   return (
     <Layout>
@@ -82,42 +82,44 @@ const Recipes = () => {
           </Button>
         </div>
       ) : (
-        <Fab
-          color="secondary"
-          aria-label="add"
-          onClick={() => setViewAddRecipeForm(!viewAddRecipeForm)}
-        >
-          <Add />
-        </Fab>
+        <>
+          <Fab
+            color="secondary"
+            aria-label="add"
+            onClick={() => setViewAddRecipeForm(!viewAddRecipeForm)}
+          >
+            <Add />
+          </Fab>
+          <RecipeFormModal
+            viewAddRecipeForm={viewAddRecipeForm}
+            setViewAddRecipeForm={setViewAddRecipeForm}
+            user={user}
+          />
+          <Grid
+            container
+            spacing={2}
+            justifyContent="space-around"
+            alignItems="stretch"
+          >
+            {userLoading && <p>loading...</p>}
+            {userError && <p> Error: {userError.message}</p>}
+            {userRecipes && userRecipes.data.length === 0 && (
+              <p>No recipes . . .</p>
+            )}
+            {userRecipes &&
+              userRecipes.data.map(recipe => (
+                // eslint-disable-next-line no-underscore-dangle
+                <Grid key={recipe._id} item xs={12} sm={6} lg={4}>
+                  <RecipeCard
+                    recipe={recipe}
+                    user={user}
+                    userFavorites={userFavorites && userFavorites}
+                  />
+                </Grid>
+              ))}
+          </Grid>
+        </>
       )}
-      <RecipeFormModal
-        viewAddRecipeForm={viewAddRecipeForm}
-        setViewAddRecipeForm={setViewAddRecipeForm}
-        user={user}
-      />
-      <Grid
-        container
-        spacing={2}
-        justifyContent="space-around"
-        alignItems="flex-start"
-      >
-        {recipeLoading && <p>loading...</p>}
-        {recipeError && <p> Error: {recipeError.message}</p>}
-        {recipes && recipes.length === 0 && <p>No recipes . . .</p>}
-        {recipes &&
-          recipes.map(recipe => (
-            // eslint-disable-next-line no-underscore-dangle
-            <Grid key={recipe._id} item xs={12} sm={6} lg={4}>
-              <Container>
-                <RecipeCard
-                  recipe={recipe}
-                  user={user}
-                  userFavorites={userFavorites && userFavorites}
-                />
-              </Container>
-            </Grid>
-          ))}
-      </Grid>
     </Layout>
   )
 }

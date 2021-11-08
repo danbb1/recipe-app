@@ -12,7 +12,11 @@ const SessionCheck = ({ children }) => {
   }
 
   useEffect(() => {
-    silentAuth(handleCheckSession)
+    try {
+      silentAuth(handleCheckSession)
+    } catch (error) {
+      console.log("Error:", error)
+    }
   }, [])
 
   return <>{!loading && children}</>
