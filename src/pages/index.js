@@ -39,7 +39,7 @@ const CarouselComponent = ({ recipes, user, userFavorites }) => {
   const [views, setViews] = useState()
 
   useEffect(() => {
-    if (!windowSize) return
+    if (!windowSize || !recipes) return
 
     if (windowSize.windowWidth < 768) setNumberOfCards(1)
     if (windowSize.windowWidth >= 768 && windowSize.windowWidth < 1280)
@@ -47,7 +47,7 @@ const CarouselComponent = ({ recipes, user, userFavorites }) => {
     if (windowSize.windowWidth >= 1280) setNumberOfCards(3)
 
     setNumberOfViews(Math.ceil(recipes.length / numberOfCards))
-  }, [windowSize])
+  }, [windowSize, recipes])
 
   useEffect(() => {
     const newViews = []
@@ -87,9 +87,9 @@ const CarouselComponent = ({ recipes, user, userFavorites }) => {
 }
 
 const IndexPage = () => {
-  const [recipes, setRecipes] = useState()
-  const [userFavorites, setUserFavorites] = useState()
-  const [sortedRecipes, setSortedRecipes] = useState()
+  const [recipes, setRecipes] = useState([])
+  const [userFavorites, setUserFavorites] = useState([])
+
   const user = isAuthenticated() ? getProfile() : null
 
   const {
@@ -102,17 +102,12 @@ const IndexPage = () => {
     loading: userLoading,
     error: userError,
     data: userData,
-  } = useQuery(GET_USER_DETAILS, { variables: { authId: user.sub } })
+  } = useQuery(GET_USER_DETAILS, {
+    variables: { authId: user ? user.sub : null },
+  })
 
   useEffect(() => {
-    if (userLoading || recipeLoading) return
-
-    if (userData) {
-      const { favorites: newUserFavorites } =
-        !userLoading && !userError ? userData.getUserByAuthId : null
-
-      setUserFavorites(newUserFavorites)
-    }
+    if (recipeLoading) return
 
     if (recipeData) {
       const newRecipes =
@@ -120,20 +115,24 @@ const IndexPage = () => {
 
       setRecipes(newRecipes)
     }
-  }, [userLoading, recipeLoading, userData, recipeData])
+  }, [recipeLoading, recipeData])
 
   useEffect(() => {
-    const newSortedRecipes = recipes
-      ? [...recipes].sort((a, b) => new Date(b.date) - new Date(a.date))
-      : null
-    setSortedRecipes(newSortedRecipes)
-  }, [recipes])
+    if (userLoading) return
+
+    if (userData) {
+      const { favorites: newUserFavorites } =
+        !userLoading && !userError ? userData.getUserByAuthId : null
+
+      setUserFavorites(newUserFavorites)
+    }
+  }, [userLoading, userData])
 
   return (
     <Layout>
       <Seo title="Home" />
       <Typography gutterBottom variant="h2">{`Hello ${
-        user.nickname ? user.nickname : "friend"
+        user?.nickname ? user.nickname : "friend"
       }`}</Typography>
       <Typography gutterBottom variant="h4">
         Recently Added Recipes
@@ -144,7 +143,7 @@ const IndexPage = () => {
         <p>No recipes . . .</p>
       ) : (
         <CarouselComponent
-          recipes={sortedRecipes.filter(
+          recipes={recipes?.filter(
             recipe => new Date() - new Date(recipe.date) <= 2592000000
           )}
           user={user}
@@ -163,7 +162,8 @@ const IndexPage = () => {
             <p>Favorite some recipes!</p>
           ) : (
             <CarouselComponent
-              recipes={sortedRecipes.filter(recipe =>
+              loading={userLoading && recipeLoading}
+              recipes={recipes?.filter(recipe =>
                 // eslint-disable-next-line no-underscore-dangle
                 userFavorites.includes(recipe._id)
               )}

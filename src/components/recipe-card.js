@@ -22,13 +22,7 @@ import {
   Tooltip,
 } from "@material-ui/core"
 import { red } from "@material-ui/core/colors"
-import {
-  Favorite,
-  Share,
-  ExpandMore,
-  MoreVert,
-  Image,
-} from "@material-ui/icons"
+import { Favorite, ExpandMore, MoreVert, Image } from "@material-ui/icons"
 import { nanoid } from "nanoid"
 
 import RecipeForm from "./recipe-form"
@@ -98,13 +92,13 @@ const ViewMoreMenu = ({
     >
       <Tooltip
         title="Only recipe authors can edit recipes"
-        disableHoverListener={user.sub === recipe.user.authId}
-        disableTouchListener={user.sub === recipe.user.authId}
-        disableFocusListener={user.sub === recipe.user.authId}
+        disableHoverListener={user?.sub === recipe.user.authId}
+        disableTouchListener={user?.sub === recipe.user.authId}
+        disableFocusListener={user?.sub === recipe.user.authId}
       >
         <span>
           <MenuItem
-            disabled={user.sub !== recipe.user.authId}
+            disabled={user?.sub !== recipe.user.authId}
             onClick={() => setEditRecipe(true)}
           >
             Edit
@@ -113,13 +107,13 @@ const ViewMoreMenu = ({
       </Tooltip>
       <Tooltip
         title="Only recipe authors can delete recipes"
-        disableHoverListener={user.sub === recipe.user.authId}
-        disableTouchListener={user.sub === recipe.user.authId}
-        disableFocusListener={user.sub === recipe.user.authId}
+        disableHoverListener={user?.sub === recipe.user.authId}
+        disableTouchListener={user?.sub === recipe.user.authId}
+        disableFocusListener={user?.sub === recipe.user.authId}
       >
         <span>
           <MenuItem
-            disabled={user.sub !== recipe.user.authId}
+            disabled={user?.sub !== recipe.user.authId}
             // eslint-disable-next-line no-underscore-dangle
             onClick={() => deleteRecipe({ variables: { id: recipe._id } })}
           >
@@ -315,12 +309,13 @@ ViewMoreMenu.propTypes = {
   }).isRequired,
   user: PropTypes.shape({
     sub: PropTypes.string,
-  }).isRequired,
+  }),
   setEditRecipe: PropTypes.func.isRequired,
 }
 
 ViewMoreMenu.defaultProps = {
   anchorEl: null,
+  user: null,
 }
 
 RecipeCard.propTypes = {

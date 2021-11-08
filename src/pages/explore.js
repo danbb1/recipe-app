@@ -15,7 +15,7 @@ const Recipes = () => {
   const [userFavorites, setUserFavorites] = useState()
   const [searchBy, setSearchBy] = useState("")
   const [searchFilter, setSearchFilter] = useState("")
-  const [recipesToShow, setRecipesToShow] = useState()
+  const [recipesToShow, setRecipesToShow] = useState([])
 
   const user = getProfile()
 
