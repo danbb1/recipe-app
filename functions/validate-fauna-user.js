@@ -61,7 +61,7 @@ exports.handler = async ({ body, httpMethod }) => {
       }),
     }
   } catch (err) {
-    console.err(err.message)
+    console.log(err.message)
 
     return {
       statusCode: 500,
