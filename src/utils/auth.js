@@ -33,6 +33,9 @@ export const login = () => {
   auth.authorize()
 }
 
+const getFaunaToken = async () =>
+  axios.post("/.netlify/functions/get-access-token")
+
 const setSession =
   (cb = () => {}) =>
   async (err, authResult) => {
@@ -52,6 +55,14 @@ const setSession =
       user = authResult.idTokenPayload
       if (user) {
         try {
+          const faunaTokenResp = await getFaunaToken()
+
+          if (faunaTokenResp.data.access_token)
+            sessionStorage.setItem(
+              "recipe_app_token",
+              faunaTokenResp.data.access_token
+            )
+
           const faunaUserId = await axios.post(
             "/.netlify/functions/validate-fauna-user",
             {

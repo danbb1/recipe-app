@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import React, { useState, useEffect } from "react"
 import { useQuery } from "@apollo/client"
 import { Container, Grid, Typography } from "@material-ui/core"
@@ -75,7 +76,7 @@ const CarouselComponent = ({ recipes, user, userFavorites }) => {
       {numberOfViews &&
         views.map(view => (
           <CarouselView
-            // key={`view-${view[0]._id}`}
+            key={`view-${view[0]._id}`}
             numberOfCards={numberOfCards}
             recipes={view}
             user={user}

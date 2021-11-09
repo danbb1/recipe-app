@@ -79,7 +79,7 @@ const ViewMoreMenu = ({
   setEditRecipe,
 }) => {
   const [deleteRecipe] = useMutation(DELETE_RECIPE, {
-    refetchQueries: [GET_RECIPES],
+    refetchQueries: [GET_RECIPES, GET_USER_DETAILS],
   })
 
   return (
@@ -165,7 +165,7 @@ const RecipeCard = ({ recipe, user, userFavorites }) => {
   const handleViewMoreMenuClose = () => setMenuAnchorEl(null)
 
   const [updateRecipe] = useMutation(UPDATE_RECIPE, {
-    refetchQueries: [GET_RECIPES],
+    refetchQueries: [GET_RECIPES, GET_USER_DETAILS],
   })
 
   const [updateUser] = useMutation(UPDATE_USER, {

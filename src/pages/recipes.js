@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react"
+import axios from "axios"
 import PropTypes from "prop-types"
 import { useQuery, useMutation } from "@apollo/client"
 import { Button, Grid, Fab, Modal } from "@material-ui/core"
@@ -15,7 +16,7 @@ import { ADD_RECIPE, GET_RECIPES, GET_USER_DETAILS } from "../apollo/queries"
 
 const RecipeFormModal = ({ viewAddRecipeForm, setViewAddRecipeForm, user }) => {
   const [addNewRecipe] = useMutation(ADD_RECIPE, {
-    refetchQueries: [GET_RECIPES],
+    refetchQueries: [GET_RECIPES, GET_USER_DETAILS],
   })
 
   const handleSubmit = async recipe => {

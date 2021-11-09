@@ -23,10 +23,7 @@ module.exports = {
     {
       resolve: `gatsby-plugin-apollo`,
       options: {
-        uri: "http://localhost:8084/graphql",
-        headers: {
-          Authorization: `Bearer ${process.env.FAUNA_LOCAL_KEY}`,
-        },
+        uri: "https://graphql.fauna.com/graphql",
       },
     },
     `gatsby-transformer-sharp`,
