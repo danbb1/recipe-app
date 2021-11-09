@@ -23,7 +23,9 @@ exports.handler = async ({ body, httpMethod }) => {
       variables: { authId: userId },
     })
 
-    if (!queryResult?.data.getUserByAuthId) {
+    console.log(queryResult)
+
+    if (!queryResult.data.getUserByAuthId) {
       const userMutation = `
       mutation ($data: UserInput!) {
         createUser(data: $data) {
