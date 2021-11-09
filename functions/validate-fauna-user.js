@@ -30,6 +30,7 @@ exports.handler = async ({ body, httpMethod }) => {
           authId
           _id
           avatar
+          nickname
         }
       }
     `

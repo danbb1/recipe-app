@@ -370,7 +370,7 @@ CustomSelect.propTypes = {
   ).isRequired,
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  field: PropTypes.node.isRequired,
+  field: PropTypes.shape({}).isRequired,
 }
 
 IngredientsFieldArray.propTypes = {

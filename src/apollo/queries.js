@@ -74,6 +74,7 @@ export const GET_USER_DETAILS = gql`
           user {
             authId
             avatar
+            nickname
           }
           description
           image

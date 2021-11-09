@@ -33,14 +33,19 @@ export const login = () => {
   auth.authorize()
 }
 
-const getFaunaToken = async () =>
-  axios.post("/.netlify/functions/get-access-token")
+const getFaunaToken = async () => {
+  const faunaTokenResp = await axios.post(
+    "/.netlify/functions/get-access-token"
+  )
+
+  if (faunaTokenResp.data.access_token)
+    sessionStorage.setItem("recipe_app_token", faunaTokenResp.data.access_token)
+}
 
 const setSession =
   (cb = () => {}) =>
   async (err, authResult) => {
     if (err) {
-      console.log("Removing local storage", err)
       navigate("/")
       localStorage.removeItem("isLoggedIn")
       cb()
@@ -55,14 +60,6 @@ const setSession =
       user = authResult.idTokenPayload
       if (user) {
         try {
-          const faunaTokenResp = await getFaunaToken()
-
-          if (faunaTokenResp.data.access_token)
-            sessionStorage.setItem(
-              "recipe_app_token",
-              faunaTokenResp.data.access_token
-            )
-
           const faunaUserId = await axios.post(
             "/.netlify/functions/validate-fauna-user",
             {
@@ -76,6 +73,7 @@ const setSession =
           if (faunaUserId) {
             user.fauna_id = faunaUserId.data.id
           }
+          getFaunaToken()
         } catch (e) {
           console.log(e)
         }
@@ -112,6 +110,7 @@ export const silentAuth = callback => {
 
 export const logout = () => {
   localStorage.removeItem("isLoggedIn")
+  sessionStorage.removeItem("recipe_app_token")
   auth.logout()
 }
 
