@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import React, { useState, useEffect } from "react"
-import { useQuery } from "@apollo/client"
+import { useQuery, useApolloClient } from "@apollo/client"
 import { Grid, Typography } from "@material-ui/core"
 import { NavigateBefore, NavigateNext } from "@material-ui/icons"
 import Carousel from "react-material-ui-carousel"
@@ -107,6 +107,14 @@ const IndexPage = () => {
   } = useQuery(GET_USER_DETAILS, {
     variables: { authId: user ? user.sub : null },
   })
+
+  const client = useApolloClient()
+
+  useEffect(async () => {
+    await client.refetchQueries({
+      include: [GET_USER_DETAILS, GET_RECIPES],
+    })
+  }, [])
 
   useEffect(() => {
     if (recipeLoading) return

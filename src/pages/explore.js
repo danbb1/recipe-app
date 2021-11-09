@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { useQuery } from "@apollo/client"
+import { useQuery, useApolloClient } from "@apollo/client"
 import { Grid, TextField, MenuItem } from "@material-ui/core"
 
 import Layout from "../components/layout"
@@ -29,17 +29,20 @@ const Recipes = () => {
     loading: userLoading,
     error: userError,
     data: userData,
-  } = useQuery(GET_USER_DETAILS, { variables: { authId: user.sub } })
+  } = useQuery(GET_USER_DETAILS, {
+    variables: { authId: user ? user.sub : null },
+  })
+
+  const client = useApolloClient()
+
+  useEffect(async () => {
+    await client.refetchQueries({
+      include: [GET_USER_DETAILS, GET_RECIPES],
+    })
+  }, [])
 
   useEffect(() => {
-    if (userLoading || recipeLoading) return
-
-    if (userData) {
-      const { favorites: newUserFavorites } =
-        !userLoading && !userError ? userData.getUserByAuthId : null
-
-      setUserFavorites(newUserFavorites)
-    }
+    if (recipeLoading) return
 
     if (recipeData) {
       const newRecipes =
@@ -47,7 +50,18 @@ const Recipes = () => {
 
       setRecipes(newRecipes)
     }
-  }, [userLoading, recipeLoading])
+  }, [recipeLoading, recipeData])
+
+  useEffect(() => {
+    if (userLoading) return
+
+    if (userData) {
+      const { favorites: newUserFavorites } =
+        !userLoading && !userError ? userData.getUserByAuthId : null
+
+      setUserFavorites(newUserFavorites)
+    }
+  }, [userLoading, userData])
 
   useEffect(() => {
     if (!recipes) return
