@@ -59,8 +59,12 @@ const CarouselComponent = ({ recipes, user, userFavorites }) => {
       return
     }
 
-    for (let i = 0; i < numberOfViews; i += numberOfCards - 1) {
-      const recipesThisView = recipes.slice(i, i + numberOfCards)
+    for (let i = 0; i < numberOfViews; i += 1) {
+      const startIndex = i * numberOfCards
+      const recipesThisView = recipes.slice(
+        startIndex,
+        startIndex + numberOfCards
+      )
       newViews.push(recipesThisView)
     }
 
