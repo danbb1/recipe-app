@@ -35,7 +35,6 @@ const Recipes = () => {
     if (userLoading || recipeLoading) return
 
     if (userData) {
-      console.log(userData)
       const { favorites: newUserFavorites } =
         !userLoading && !userError ? userData.getUserByAuthId : null
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react"
-import axios from "axios"
 import PropTypes from "prop-types"
 import { useQuery, useMutation } from "@apollo/client"
 import { Button, Grid, Fab, Modal } from "@material-ui/core"

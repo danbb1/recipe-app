@@ -2,8 +2,14 @@
 import PropTypes from "prop-types"
 
 import React, { useState, useEffect } from "react"
-import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client"
-import { getProfile, silentAuth } from "./src/utils/auth"
+import {
+  ApolloClient,
+  ApolloProvider,
+  InMemoryCache,
+  ApolloLink,
+  HttpLink,
+} from "@apollo/client"
+import { silentAuth } from "./src/utils/auth"
 
 const cache = new InMemoryCache()
 
@@ -26,24 +32,22 @@ const SessionCheck = ({ children }) => {
 }
 
 const ApolloWrapper = ({ children }) => {
-  const [headers, setHeaders] = useState(process.env.GATSBY_FAUNA_READ_KEY)
+  const httpLink = new HttpLink({ uri: "https://graphql.fauna.com/graphql" })
 
-  const user = getProfile()
+  const authLink = new ApolloLink((operation, forward) => {
+    const token = sessionStorage.getItem("recipe_app_token")
 
-  useEffect(() => {
-    console.log("Checking headers", user)
-    const newHeaders =
-      sessionStorage.getItem("recipe_app_token") ||
-      process.env.GATSBY_FAUNA_READ_KEY
+    operation.setContext({
+      headers: {
+        Authorization: `Bearer ${token || process.env.GATSBY_FAUNA_READ_KEY}`,
+      },
+    })
 
-    setHeaders(newHeaders)
-  }, [user])
+    return forward(operation)
+  })
 
   const client = new ApolloClient({
-    uri: "https://graphql.fauna.com/graphql",
-    headers: {
-      Authorization: `Bearer ${headers}`,
-    },
+    link: authLink.concat(httpLink),
     cache,
   })
 
@@ -57,5 +61,9 @@ export const wrapRootElement = ({ element }) => (
 )
 
 SessionCheck.propTypes = {
+  children: PropTypes.node.isRequired,
+}
+
+ApolloWrapper.propTypes = {
   children: PropTypes.node.isRequired,
 }

@@ -122,7 +122,6 @@ const Header = ({ siteTitle, drawerWidth }) => {
             <Button
               variant="contained"
               onClick={e => {
-                console.log("login attempted")
                 login()
                 e.preventDefault()
               }}
@@ -175,10 +174,8 @@ Header.propTypes = {
     picture: PropTypes.string,
     nickname: PropTypes.string,
   }),
-  isAuthenticated: PropTypes.bool,
 }
 
 Header.defaultProps = {
   user: undefined,
-  isAuthenticated: false,
 }

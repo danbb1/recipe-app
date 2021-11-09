@@ -1,5 +1,11 @@
 import { gql } from "@apollo/client"
 
+export const READ_TOKEN = gql`
+  query {
+    token
+  }
+`
+
 export const GET_RECIPES = gql`
   query {
     allRecipes {

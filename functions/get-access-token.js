@@ -17,8 +17,6 @@ exports.handler = async ({ httpMethod }) => {
       "content-type": "application/json",
     })
 
-    console.log(response)
-
     return {
       statusCode: 200,
       body: JSON.stringify(response.data),

@@ -346,6 +346,7 @@ RecipeCard.propTypes = {
   user: PropTypes.shape({
     fauna_id: PropTypes.string,
     sub: PropTypes.string,
+    nickname: PropTypes.string,
   }),
   userFavorites: PropTypes.arrayOf(PropTypes.string),
 }

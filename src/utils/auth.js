@@ -95,6 +95,7 @@ export const handleAuthentication = () => {
 
 export const getProfile = () => user
 
+// eslint-disable-next-line consistent-return
 export const silentAuth = callback => {
   if (!isAuthenticated()) return callback()
   sessionStorage.setItem(

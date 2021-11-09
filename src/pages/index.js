@@ -1,9 +1,10 @@
 /* eslint-disable no-underscore-dangle */
 import React, { useState, useEffect } from "react"
 import { useQuery } from "@apollo/client"
-import { Container, Grid, Typography } from "@material-ui/core"
+import { Grid, Typography } from "@material-ui/core"
 import { NavigateBefore, NavigateNext } from "@material-ui/icons"
 import Carousel from "react-material-ui-carousel"
+import PropTypes from "prop-types"
 
 import { GET_RECIPES, GET_USER_DETAILS } from "../apollo/queries"
 import { isAuthenticated, getProfile } from "../utils/auth"
@@ -179,3 +180,25 @@ const IndexPage = () => {
 }
 
 export default IndexPage
+
+CarouselView.propTypes = {
+  recipes: PropTypes.arrayOf().isRequired,
+  user: PropTypes.shape({}),
+  userFavorites: PropTypes.arrayOf(PropTypes.string),
+}
+
+CarouselView.defaultProps = {
+  user: {},
+  userFavorites: [],
+}
+
+CarouselComponent.propTypes = {
+  recipes: PropTypes.arrayOf().isRequired,
+  user: PropTypes.shape({}),
+  userFavorites: PropTypes.arrayOf(PropTypes.string),
+}
+
+CarouselComponent.defaultProps = {
+  user: {},
+  userFavorites: [],
+}
