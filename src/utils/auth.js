@@ -23,7 +23,7 @@ const tokens = {
 let user = {}
 
 export const isAuthenticated = () =>
-  isBrowser && Boolean(localStorage.getItem("isLoggedIn"))
+  isBrowser && Boolean(localStorage.getItem("recipeAppIsLoggedIn"))
 
 export const login = () => {
   if (!isBrowser) {
@@ -47,7 +47,7 @@ const setSession =
   async (err, authResult) => {
     if (err) {
       navigate("/")
-      localStorage.removeItem("isLoggedIn")
+      localStorage.removeItem("recipeAppIsLoggedIn")
       cb()
       return
     }
@@ -78,7 +78,7 @@ const setSession =
           console.log(e)
         }
       }
-      localStorage.setItem("isLoggedIn", true)
+      localStorage.setItem("recipeAppIsLoggedIn", true)
       const loginRedirectRoute = sessionStorage.getItem("recipeAppLoginPath")
       navigate(loginRedirectRoute || "/")
       cb()
@@ -105,12 +105,12 @@ export const silentAuth = callback => {
   try {
     auth.checkSession({}, setSession(callback))
   } catch (error) {
-    localStorage.setItem("isLoggedIn", false)
+    localStorage.setItem("recipeAppIsLoggedIn", false)
   }
 }
 
 export const logout = () => {
-  localStorage.removeItem("isLoggedIn")
+  localStorage.removeItem("recipeAppIsLoggedIn")
   sessionStorage.removeItem("recipe_app_token")
   auth.logout()
 }
