@@ -4,9 +4,7 @@ import userEvent from "@testing-library/user-event"
 
 import { MockedProvider } from "@apollo/client/testing"
 import RecipeCard from "../recipe-card"
-import { isAuthenticated } from "../../utils/auth"
 import {
-  GET_RECIPES,
   UPDATE_RECIPE,
   DELETE_RECIPE,
   UPDATE_USER,
